@@ -1,490 +1,1243 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoldenSage — Voice Assistant</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
-        :root {
-            --primary:#5A7F61;--primary-d:#3d5e44;--primary-l:#E8F0EA;
-            --accent:#C5A028;--danger:#e11d48;--danger-l:#fff1f2;
-            --warning:#f59e0b;--success:#10b981;--bg:#F2F6F3;
-            --card:#ffffff;--text:#1E293B;--muted:#64748B;--border:#E2E8F0;
-            --topbar-h:64px;
-        }
-        *{box-sizing:border-box;margin:0;padding:0}
-        html,body{min-height:100vh;min-height:100dvh;height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}
-        .topbar{height:var(--topbar-h);background:linear-gradient(135deg,var(--primary),var(--primary-d));display:flex;align-items:center;justify-content:space-between;padding:0 clamp(12px,3vw,28px);gap:10px;flex-wrap:wrap;box-shadow:0 4px 20px rgba(90,127,97,.25);position:sticky;top:0;z-index:100}
-        .topbar-left{display:flex;align-items:center;gap:14px}
-        .topbar-logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
-        .topbar-title h1{font-size:clamp(0.95rem,2.5vw,1.2rem);font-weight:800;color:white;line-height:1}
-        .topbar-title p{font-size:.72rem;opacity:.75;color:white;margin-top:2px}
-        .topbar-right{display:flex;align-items:center;gap:10px}
-        .topbar-btn{background:rgba(255,255,255,.18);border:none;color:white;padding:8px clamp(10px,2vw,16px);border-radius:10px;cursor:pointer;font-weight:700;font-size:clamp(0.75rem,1.5vw,.85rem);font-family:inherit;display:flex;align-items:center;gap:6px;text-decoration:none;transition:background .2s;white-space:nowrap}
-        .topbar-btn:hover{background:rgba(255,255,255,.3)}
-        .badge-live{background:#10b981;color:white;font-size:.6rem;font-weight:800;padding:2px 6px;border-radius:20px;letter-spacing:.5px}
-        .app-body{display:grid;grid-template-columns:minmax(240px,290px) 1fr;min-height:calc(100vh - var(--topbar-h));min-height:calc(100dvh - var(--topbar-h));overflow:hidden}
-        /* SIDEBAR */
-        .sidebar{background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:clamp(12px,2vw,18px);gap:clamp(12px,2vw,18px)}
-        .section-label{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
-        .lang-select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:.92rem;font-weight:600;background:var(--bg);color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235A7F61' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-        .lang-select:focus{outline:none;border-color:var(--primary)}
-        .speed-row{display:flex;align-items:center;gap:10px}
-        .speed-row label{font-size:.8rem;font-weight:600;color:var(--muted);white-space:nowrap}
-        .speed-range{flex:1;accent-color:var(--primary)}
-        .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-        .quick-chip{background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:clamp(7px,1.5vw,9px) clamp(6px,1vw,8px);font-size:clamp(0.7rem,1.5vw,.78rem);font-weight:700;cursor:pointer;color:var(--text);font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .18s}
-        .quick-chip:hover{background:var(--primary-l);border-color:var(--primary);color:var(--primary)}
-        .quick-chip.danger{border-color:#fca5a5;color:var(--danger)}
-        .quick-chip.danger:hover{background:var(--danger-l);border-color:var(--danger)}
-        .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-        .toggle-row:last-child{border-bottom:none}
-        .toggle-label{font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px}
-        .toggle-switch{width:42px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .25s;border:none;flex-shrink:0}
-        .toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-        .toggle-switch.on{background:var(--primary)}
-        .toggle-switch.on::after{transform:translateX(18px)}
-        /* CENTER */
-        .center-panel{display:flex;flex-direction:column;overflow:hidden}
-        .conversation{flex:1;overflow-y:auto;padding:clamp(12px,3vw,22px) clamp(16px,4vw,24px);display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;min-height:0}
-        .msg-row{display:flex;gap:10px;align-items:flex-end}
-        .msg-row.user{flex-direction:row-reverse}
-        .msg-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
-        .msg-avatar.bot{background:var(--primary-l);color:var(--primary)}
-        .msg-avatar.user{background:#EEF2FF;color:#4F46E5}
-        .msg-bubble{max-width:min(85%,400px);padding:clamp(10px,2vw,12px) clamp(12px,3vw,16px);border-radius:18px;font-size:clamp(0.88rem,1.5vw,.93rem);line-height:1.65}
-        .msg-bubble.bot{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-        .msg-bubble.user{background:var(--primary);color:white;border-bottom-right-radius:4px}
-        .msg-time{font-size:.68rem;color:var(--muted);margin-top:3px;text-align:right}
-        .msg-row.user .msg-time{text-align:left}
-        .typing-dots{display:flex;gap:4px;align-items:center;padding:4px 0}
-        .typing-dots span{width:7px;height:7px;background:var(--muted);border-radius:50%;animation:dot-bounce 1.2s ease-in-out infinite}
-        .typing-dots span:nth-child(2){animation-delay:.2s}
-        .typing-dots span:nth-child(3){animation-delay:.4s}
-        @keyframes dot-bounce{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
-        .action-pill{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:9px 16px;border-radius:10px;font-weight:700;font-size:.84rem;cursor:pointer;border:none;font-family:inherit;margin-top:10px;transition:background .2s}
-        .action-pill:hover{background:var(--primary-d)}
-        .action-pill.danger{background:var(--danger)}
-        .action-pill.danger:hover{background:#be123c}
-        /* MIC BAR */
-        .mic-bar{background:var(--card);border-top:1px solid var(--border);padding:clamp(10px,2vw,14px) clamp(12px,3vw,20px);display:flex;align-items:center;gap:12px;flex-shrink:0}
-        .orb-wrap{position:relative;flex-shrink:0}
-        .orb-ring{position:absolute;border-radius:50%;border:2px solid var(--primary);opacity:0;top:50%;left:50%;transform:translate(-50%,-50%)}
-        .orb-ring.r1{width:62px;height:62px}
-        .orb-ring.r2{width:80px;height:80px;animation-delay:.3s}
-        @keyframes pulse-ring{0%{opacity:.5;transform:translate(-50%,-50%) scale(.85)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}}
-        .orb-btn{width:clamp(44px,10vw,50px);height:clamp(44px,10vw,50px);border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-d));border:none;color:white;font-size:1.15rem;cursor:pointer;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(90,127,97,.4);transition:transform .15s,box-shadow .15s;flex-shrink:0}
-        .orb-btn:hover{transform:scale(1.08)}
-        .orb-btn.live{background:linear-gradient(135deg,var(--danger),#be123c);box-shadow:0 4px 18px rgba(225,29,72,.45)}
-        .orb-btn.live~.orb-ring{animation:pulse-ring 1.3s ease-out infinite}
-        .wave-bars{display:flex;gap:3px;align-items:center;height:26px;opacity:0;transition:opacity .2s}
-        .wave-bars.active{opacity:1}
-        .wave-bars span{width:4px;border-radius:2px;background:var(--primary);animation:wave-bar .9s ease-in-out infinite}
-        .wave-bars span:nth-child(1){height:8px;animation-delay:0s}.wave-bars span:nth-child(2){height:18px;animation-delay:.1s}.wave-bars span:nth-child(3){height:24px;animation-delay:.2s}.wave-bars span:nth-child(4){height:14px;animation-delay:.3s}.wave-bars span:nth-child(5){height:20px;animation-delay:.4s}
-        @keyframes wave-bar{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
-        .mic-text-wrap{flex:1}
-        .mic-status{font-size:.9rem;font-weight:700;color:var(--text)}
-        .mic-hint{font-size:.76rem;color:var(--muted);margin-top:2px}
-        .type-wrap{flex:1;display:flex;gap:8px}
-        .type-input{flex:1;padding:11px 15px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:.9rem;background:var(--bg)}
-        .type-input:focus{outline:none;border-color:var(--primary)}
-        .send-btn{background:var(--primary);color:white;border:none;padding:11px 15px;border-radius:12px;cursor:pointer;font-size:1rem;transition:background .2s}
-        .send-btn:hover{background:var(--primary-d)}
-        .mode-tabs{display:flex;gap:0;background:var(--bg);border-radius:10px;padding:3px;border:1px solid var(--border)}
-        .mode-tab{flex:1;padding:7px;border-radius:8px;border:none;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
-        .mode-tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-        .no-mic-banner{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:.82rem;color:#92400e;display:none;margin:0 20px 8px}
-        /* RIGHT */
-        .right-panel{background:var(--card);border-left:1px solid var(--border);overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:16px}
-        .info-card{background:var(--bg);border-radius:14px;padding:16px;border:1px solid var(--border)}
-        .info-card .card-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px}
-        .last-action{display:flex;align-items:center;gap:12px;padding:13px;background:var(--primary-l);border-radius:12px;border:1px solid #c5d9c9}
-        .last-action .la-icon{font-size:1.7rem}
-        .last-action .la-title{font-weight:800;font-size:.92rem;color:var(--primary-d)}
-        .last-action .la-sub{font-size:.76rem;color:var(--muted);margin-top:2px}
-        .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-        .stat-box{background:var(--card);border-radius:10px;padding:11px;text-align:center;border:1px solid var(--border)}
-        .stat-box .stat-num{font-size:1.5rem;font-weight:800;color:var(--primary)}
-        .stat-box .stat-lbl{font-size:.7rem;color:var(--muted);font-weight:600}
-        .cap-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.83rem}
-        .cap-item:last-child{border-bottom:none}
-        .cap-icon{color:var(--primary);font-size:.88rem;margin-top:2px;flex-shrink:0}
-        .cap-text{color:var(--muted);line-height:1.4}
-        .cap-text strong{color:var(--text);display:block}
-        .suggest-chip{display:block;width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 11px;margin-bottom:6px;font-size:.8rem;font-weight:600;text-align:left;cursor:pointer;color:var(--text);font-family:inherit;transition:all .18s}
-        .suggest-chip:hover{background:var(--primary-l);border-color:var(--primary);color:var(--primary)}
-        @keyframes sos-glow{0%,100%{box-shadow:0 0 0 0 rgba(225,29,72,.5)}50%{box-shadow:0 0 0 8px rgba(225,29,72,0)}}
-        .sos-pulse{animation:sos-glow 1.5s ease-in-out infinite}
-        @media(max-width:1000px){.app-body{grid-template-columns:minmax(220px,260px) 1fr}.sidebar{padding:14px}}
-        @media(max-width:768px){
-            .topbar-title p{display:none}
-            .topbar .btn-label{display:none}
-        }
-        @media(max-width:700px){
-            .app-body{grid-template-columns:1fr}
-            .sidebar{position:fixed;top:var(--topbar-h);left:0;bottom:0;width:min(320px,85vw);z-index:99;transform:translateX(-100%);transition:transform .3s ease;box-shadow:4px 0 20px rgba(0,0,0,.12)}
-            .sidebar.open{transform:translateX(0)}
-            .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:98;top:var(--topbar-h)}
-            .sidebar-overlay.open{display:block}
-            .topbar-menu-btn{display:flex!important}
-        }
-        .topbar-menu-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,.2);border:none;border-radius:10px;color:white;font-size:1.2rem;cursor:pointer}
-        .topbar-menu-btn:hover{background:rgba(255,255,255,.3)}
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoldenSage — Voice Assistant</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+
+    :root {
+      --primary: #5A7F61;
+      --primary-d: #3d5e44;
+      --primary-l: #E8F0EA;
+      --accent: #C5A028;
+      --danger: #e11d48;
+      --danger-l: #fff1f2;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --bg: #F2F6F3;
+      --card: #ffffff;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --topbar-h: 64px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text)
+    }
+
+    .topbar {
+      height: var(--topbar-h);
+      background: linear-gradient(135deg, var(--primary), var(--primary-d));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(12px, 3vw, 28px);
+      gap: 10px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 20px rgba(90, 127, 97, .25);
+      position: sticky;
+      top: 0;
+      z-index: 100
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .topbar-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem
+    }
+
+    .topbar-title h1 {
+      font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+      font-weight: 800;
+      color: white;
+      line-height: 1
+    }
+
+    .topbar-title p {
+      font-size: .72rem;
+      opacity: .75;
+      color: white;
+      margin-top: 2px
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .topbar-btn {
+      background: rgba(255, 255, 255, .18);
+      border: none;
+      color: white;
+      padding: 8px clamp(10px, 2vw, 16px);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: clamp(0.75rem, 1.5vw, .85rem);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background .2s;
+      white-space: nowrap
+    }
+
+    .topbar-btn:hover {
+      background: rgba(255, 255, 255, .3)
+    }
+
+    .badge-live {
+      background: #10b981;
+      color: white;
+      font-size: .6rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 20px;
+      letter-spacing: .5px
+    }
+
+    .app-body {
+      display: grid;
+      grid-template-columns: minmax(240px, 290px) 1fr;
+      min-height: calc(100vh - var(--topbar-h));
+      min-height: calc(100dvh - var(--topbar-h));
+      overflow: hidden
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: clamp(12px, 2vw, 18px);
+      gap: clamp(12px, 2vw, 18px)
+    }
+
+    .section-label {
+      font-size: .68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 8px
+    }
+
+    .lang-select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: .92rem;
+      font-weight: 600;
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235A7F61' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center
+    }
+
+    .lang-select:focus {
+      outline: none;
+      border-color: var(--primary)
+    }
+
+    .speed-row {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .speed-row label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .speed-range {
+      flex: 1;
+      accent-color: var(--primary)
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px
+    }
+
+    .quick-chip {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      padding: clamp(7px, 1.5vw, 9px) clamp(6px, 1vw, 8px);
+      font-size: clamp(0.7rem, 1.5vw, .78rem);
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all .18s
+    }
+
+    .quick-chip:hover {
+      background: var(--primary-l);
+      border-color: var(--primary);
+      color: var(--primary)
+    }
+
+    .quick-chip.danger {
+      border-color: #fca5a5;
+      color: var(--danger)
+    }
+
+    .quick-chip.danger:hover {
+      background: var(--danger-l);
+      border-color: var(--danger)
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none
+    }
+
+    .toggle-label {
+      font-size: .85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .toggle-switch {
+      width: 42px;
+      height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      transition: background .25s;
+      border: none;
+      flex-shrink: 0
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform .25s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .2)
+    }
+
+    .toggle-switch.on {
+      background: var(--primary)
+    }
+
+    .toggle-switch.on::after {
+      transform: translateX(18px)
+    }
+
+    /* CENTER */
+    .center-panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .conversation {
+      flex: 1;
+      overflow-y: auto;
+      padding: clamp(12px, 3vw, 22px) clamp(16px, 4vw, 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+      min-height: 0
+    }
+
+    .msg-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end
+    }
+
+    .msg-row.user {
+      flex-direction: row-reverse
+    }
+
+    .msg-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0
+    }
+
+    .msg-avatar.bot {
+      background: var(--primary-l);
+      color: var(--primary)
+    }
+
+    .msg-avatar.user {
+      background: #EEF2FF;
+      color: #4F46E5
+    }
+
+    .msg-bubble {
+      max-width: min(85%, 400px);
+      padding: clamp(10px, 2vw, 12px) clamp(12px, 3vw, 16px);
+      border-radius: 18px;
+      font-size: clamp(0.88rem, 1.5vw, .93rem);
+      line-height: 1.65
+    }
+
+    .msg-bubble.bot {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .05)
+    }
+
+    .msg-bubble.user {
+      background: var(--primary);
+      color: white;
+      border-bottom-right-radius: 4px
+    }
+
+    .msg-time {
+      font-size: .68rem;
+      color: var(--muted);
+      margin-top: 3px;
+      text-align: right
+    }
+
+    .msg-row.user .msg-time {
+      text-align: left
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      padding: 4px 0
+    }
+
+    .typing-dots span {
+      width: 7px;
+      height: 7px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: dot-bounce 1.2s ease-in-out infinite
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: .2s
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: .4s
+    }
+
+    @keyframes dot-bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(.7);
+        opacity: .5
+      }
+
+      40% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: white;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: .84rem;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      margin-top: 10px;
+      transition: background .2s
+    }
+
+    .action-pill:hover {
+      background: var(--primary-d)
+    }
+
+    .action-pill.danger {
+      background: var(--danger)
+    }
+
+    .action-pill.danger:hover {
+      background: #be123c
+    }
+
+    /* MIC BAR */
+    .mic-bar {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: clamp(10px, 2vw, 14px) clamp(12px, 3vw, 20px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0
+    }
+
+    .orb-wrap {
+      position: relative;
+      flex-shrink: 0
+    }
+
+    .orb-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      opacity: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%)
+    }
+
+    .orb-ring.r1 {
+      width: 62px;
+      height: 62px
+    }
+
+    .orb-ring.r2 {
+      width: 80px;
+      height: 80px;
+      animation-delay: .3s
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        opacity: .5;
+        transform: translate(-50%, -50%) scale(.85)
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.15)
+      }
+    }
+
+    .orb-btn {
+      width: clamp(44px, 10vw, 50px);
+      height: clamp(44px, 10vw, 50px);
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-d));
+      border: none;
+      color: white;
+      font-size: 1.15rem;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(90, 127, 97, .4);
+      transition: transform .15s, box-shadow .15s;
+      flex-shrink: 0
+    }
+
+    .orb-btn:hover {
+      transform: scale(1.08)
+    }
+
+    .orb-btn.live {
+      background: linear-gradient(135deg, var(--danger), #be123c);
+      box-shadow: 0 4px 18px rgba(225, 29, 72, .45)
+    }
+
+    .orb-btn.live~.orb-ring {
+      animation: pulse-ring 1.3s ease-out infinite
+    }
+
+    .wave-bars {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      height: 26px;
+      opacity: 0;
+      transition: opacity .2s
+    }
+
+    .wave-bars.active {
+      opacity: 1
+    }
+
+    .wave-bars span {
+      width: 4px;
+      border-radius: 2px;
+      background: var(--primary);
+      animation: wave-bar .9s ease-in-out infinite
+    }
+
+    .wave-bars span:nth-child(1) {
+      height: 8px;
+      animation-delay: 0s
+    }
+
+    .wave-bars span:nth-child(2) {
+      height: 18px;
+      animation-delay: .1s
+    }
+
+    .wave-bars span:nth-child(3) {
+      height: 24px;
+      animation-delay: .2s
+    }
+
+    .wave-bars span:nth-child(4) {
+      height: 14px;
+      animation-delay: .3s
+    }
+
+    .wave-bars span:nth-child(5) {
+      height: 20px;
+      animation-delay: .4s
+    }
+
+    @keyframes wave-bar {
+
+      0%,
+      100% {
+        transform: scaleY(.4)
+      }
+
+      50% {
+        transform: scaleY(1)
+      }
+    }
+
+    .mic-text-wrap {
+      flex: 1
+    }
+
+    .mic-status {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    .mic-hint {
+      font-size: .76rem;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .type-wrap {
+      flex: 1;
+      display: flex;
+      gap: 8px
+    }
+
+    .type-input {
+      flex: 1;
+      padding: 11px 15px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: .9rem;
+      background: var(--bg)
+    }
+
+    .type-input:focus {
+      outline: none;
+      border-color: var(--primary)
+    }
+
+    .send-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 11px 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background .2s
+    }
+
+    .send-btn:hover {
+      background: var(--primary-d)
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 0;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 3px;
+      border: 1px solid var(--border)
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 7px;
+      border-radius: 8px;
+      border: none;
+      font-family: inherit;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all .2s
+    }
+
+    .mode-tab.active {
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .08)
+    }
+
+    .no-mic-banner {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: .82rem;
+      color: #92400e;
+      display: none;
+      margin: 0 20px 8px
+    }
+
+    /* RIGHT */
+    .right-panel {
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .info-card {
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid var(--border)
+    }
+
+    .info-card .card-title {
+      font-size: .7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 10px
+    }
+
+    .last-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px;
+      background: var(--primary-l);
+      border-radius: 12px;
+      border: 1px solid #c5d9c9
+    }
+
+    .last-action .la-icon {
+      font-size: 1.7rem
+    }
+
+    .last-action .la-title {
+      font-weight: 800;
+      font-size: .92rem;
+      color: var(--primary-d)
+    }
+
+    .last-action .la-sub {
+      font-size: .76rem;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .stat-box {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 11px;
+      text-align: center;
+      border: 1px solid var(--border)
+    }
+
+    .stat-box .stat-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary)
+    }
+
+    .stat-box .stat-lbl {
+      font-size: .7rem;
+      color: var(--muted);
+      font-weight: 600
+    }
+
+    .cap-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .83rem
+    }
+
+    .cap-item:last-child {
+      border-bottom: none
+    }
+
+    .cap-icon {
+      color: var(--primary);
+      font-size: .88rem;
+      margin-top: 2px;
+      flex-shrink: 0
+    }
+
+    .cap-text {
+      color: var(--muted);
+      line-height: 1.4
+    }
+
+    .cap-text strong {
+      color: var(--text);
+      display: block
+    }
+
+    .suggest-chip {
+      display: block;
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 11px;
+      margin-bottom: 6px;
+      font-size: .8rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      color: var(--text);
+      font-family: inherit;
+      transition: all .18s
+    }
+
+    .suggest-chip:hover {
+      background: var(--primary-l);
+      border-color: var(--primary);
+      color: var(--primary)
+    }
+
+    @keyframes sos-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(225, 29, 72, .5)
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(225, 29, 72, 0)
+      }
+    }
+
+    .sos-pulse {
+      animation: sos-glow 1.5s ease-in-out infinite
+    }
+
+    @media(max-width:1000px) {
+      .app-body {
+        grid-template-columns: minmax(220px, 260px) 1fr
+      }
+
+      .sidebar {
+        padding: 14px
+      }
+    }
+
+    @media(max-width:768px) {
+      .topbar-title p {
+        display: none
+      }
+
+      .topbar .btn-label {
+        display: none
+      }
+    }
+
+    @media(max-width:700px) {
+      .app-body {
+        grid-template-columns: 1fr
+      }
+
+      .sidebar {
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        bottom: 0;
+        width: min(320px, 85vw);
+        z-index: 99;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, .12)
+      }
+
+      .sidebar.open {
+        transform: translateX(0)
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .4);
+        z-index: 98;
+        top: var(--topbar-h)
+      }
+
+      .sidebar-overlay.open {
+        display: block
+      }
+
+      .topbar-menu-btn {
+        display: flex !important
+      }
+    }
+
+    .topbar-menu-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, .2);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer
+    }
+
+    .topbar-menu-btn:hover {
+      background: rgba(255, 255, 255, .3)
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="topbar">
+  <div class="topbar">
     <div class="topbar-left">
-        <button class="topbar-menu-btn" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
-        <div class="topbar-logo">🌸</div>
-        <div class="topbar-title">
-            <h1>GoldenSage Voice Assistant</h1>
-            <p>Powered by Google Gemini AI &nbsp;•&nbsp; 12 Indian Languages</p>
-        </div>
+      <button class="topbar-menu-btn" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Open menu"><i
+          class="fa-solid fa-bars"></i></button>
+      <div class="topbar-logo">🌸</div>
+      <div class="topbar-title">
+        <h1>GoldenSage Voice Assistant</h1>
+        <p>Powered by Google Gemini AI &nbsp;•&nbsp; Supports English & Hindi</p>
+      </div>
     </div>
     <div class="topbar-right">
-        <span class="badge-live">● LIVE</span>
-        <a href="{% if role == 'patient' %}/patient-dashboard{% else %}/guardian-dashboard{% endif %}" class="topbar-btn"><i class="fa-solid fa-house-user"></i><span class="btn-label"> My Dashboard</span></a>
-        <a href="/notifications" class="topbar-btn"><i class="fa-solid fa-bell"></i><span class="btn-label"> Alerts</span></a>
+      <span class="badge-live">● LIVE</span>
+      <a href="{% if role == 'patient' %}/patient-dashboard{% else %}/guardian-dashboard{% endif %}"
+        class="topbar-btn"><i class="fa-solid fa-house-user"></i><span class="btn-label"> My Dashboard</span></a>
+      <a href="/notifications" class="topbar-btn"><i class="fa-solid fa-bell"></i><span class="btn-label">
+          Alerts</span></a>
     </div>
-</div>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<div class="app-body">
+  <div class="app-body">
 
     <!-- ═══ LEFT SIDEBAR ═══ -->
     <div class="sidebar" id="sidebar">
-        <div>
-            <div class="section-label">🌍 Language / भाषा</div>
-            <select class="lang-select" id="langSelect" onchange="onLangChange()">
-                <option value="English"   data-sr="en-IN">English</option>
-                <option value="Hindi"     data-sr="hi-IN">हिंदी (Hindi)</option>
-                <option value="Marathi"   data-sr="mr-IN">मराठी (Marathi)</option>
-                <option value="Gujarati"  data-sr="gu-IN">ગુજરાતી (Gujarati)</option>
-                <option value="Tamil"     data-sr="ta-IN">தமிழ் (Tamil)</option>
-                <option value="Bengali"   data-sr="bn-IN">বাংলা (Bengali)</option>
-                <option value="Telugu"    data-sr="te-IN">తెలుగు (Telugu)</option>
-                <option value="Kannada"   data-sr="kn-IN">ಕನ್ನಡ (Kannada)</option>
-                <option value="Malayalam" data-sr="ml-IN">മലയാളം (Malayalam)</option>
-                <option value="Punjabi"   data-sr="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
-                <option value="Urdu"      data-sr="ur-IN">اردو (Urdu)</option>
-                <option value="Odia"      data-sr="or-IN">ଓଡ଼ିଆ (Odia)</option>
-            </select>
+      <div>
+        <div class="section-label">🌍 Language / भाषा</div>
+        <select class="lang-select" id="langSelect" onchange="onLangChange()">
+          <option value="English" data-sr="en-IN">English</option>
+          <option value="Hindi" data-sr="hi-IN">हिंदी (Hindi)</option>
+        </select>
+      </div>
+      <div>
+        <div class="section-label">🎙️ Input Mode</div>
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="modeVoice" onclick="setMode('voice')">🎧 Voice</button>
+          <button class="mode-tab" id="modeType" onclick="setMode('type')">⌨️ Type</button>
         </div>
-        <div>
-            <div class="section-label">🎙️ Input Mode</div>
-            <div class="mode-tabs">
-                <button class="mode-tab active" id="modeVoice" onclick="setMode('voice')">🎧 Voice</button>
-                <button class="mode-tab" id="modeType"  onclick="setMode('type')">⌨️ Type</button>
-            </div>
+      </div>
+      <div>
+        <div class="section-label">🔊 Speech Speed</div>
+        <div class="speed-row">
+          <label>Slow</label>
+          <input type="range" class="speed-range" id="speedRange" min="0.6" max="1.4" step="0.1" value="0.9">
+          <label>Fast</label>
         </div>
-        <div>
-            <div class="section-label">🔊 Speech Speed</div>
-            <div class="speed-row">
-                <label>Slow</label>
-                <input type="range" class="speed-range" id="speedRange" min="0.6" max="1.4" step="0.1" value="0.9">
-                <label>Fast</label>
-            </div>
+      </div>
+      <div>
+        <div class="section-label">⚡ Quick Commands</div>
+        <div class="quick-grid">
+          <button class="quick-chip" onclick="quickSend('Go to home dashboard')">🏠 My Day</button>
+          <button class="quick-chip" onclick="quickSend('Show my medicines')">💊 Medicines</button>
+          <button class="quick-chip" onclick="quickSend('Open my profile')">👤 Profile</button>
+          <button class="quick-chip" onclick="quickSend('Show my notifications')">🔔 Alerts</button>
+          <button class="quick-chip" onclick="quickSend('Open connections community')">🤝 Connect</button>
+          <button class="quick-chip" onclick="quickSend('What are my vitals today?')">❤️ Vitals</button>
+          <button class="quick-chip" onclick="quickSend('Mark my morning task complete')">✅ Tasks</button>
+          <button class="quick-chip" onclick="quickSend('Request medicine refill')">🔄 Refill</button>
+          <button class="quick-chip" onclick="quickSend('Log me out')">🚪 Logout</button>
+          <button class="quick-chip danger sos-pulse" onclick="quickSend('SOS emergency help me now')">🚨 SOS</button>
         </div>
-        <div>
-            <div class="section-label">⚡ Quick Commands</div>
-            <div class="quick-grid">
-                <button class="quick-chip" onclick="quickSend('Go to home dashboard')">🏠 My Day</button>
-                <button class="quick-chip" onclick="quickSend('Show my medicines')">💊 Medicines</button>
-                <button class="quick-chip" onclick="quickSend('Open my profile')">👤 Profile</button>
-                <button class="quick-chip" onclick="quickSend('Show my notifications')">🔔 Alerts</button>
-                <button class="quick-chip" onclick="quickSend('Open connections community')">🤝 Connect</button>
-                <button class="quick-chip" onclick="quickSend('What are my vitals today?')">❤️ Vitals</button>
-                <button class="quick-chip" onclick="quickSend('Mark my morning task complete')">✅ Tasks</button>
-                <button class="quick-chip" onclick="quickSend('Request medicine refill')">🔄 Refill</button>
-                <button class="quick-chip" onclick="quickSend('Log me out')">🚪 Logout</button>
-                <button class="quick-chip danger sos-pulse" onclick="quickSend('SOS emergency help me now')">🚨 SOS</button>
-            </div>
+      </div>
+      <div>
+        <div class="section-label">♿ Accessibility</div>
+        <div class="toggle-row">
+          <span class="toggle-label"><i class="fa-solid fa-text-height" style="color:var(--primary)"></i> Large
+            Text</span>
+          <button class="toggle-switch" id="togLargeText" onclick="toggleFeature('largeText')"></button>
         </div>
-        <div>
-            <div class="section-label">♿ Accessibility</div>
-            <div class="toggle-row">
-                <span class="toggle-label"><i class="fa-solid fa-text-height" style="color:var(--primary)"></i> Large Text</span>
-                <button class="toggle-switch" id="togLargeText" onclick="toggleFeature('largeText')"></button>
-            </div>
-            <div class="toggle-row">
-                <span class="toggle-label"><i class="fa-solid fa-moon" style="color:var(--primary)"></i> Dark Mode</span>
-                <button class="toggle-switch" id="togDark" onclick="toggleFeature('dark')"></button>
-            </div>
-            <div class="toggle-row">
-                <span class="toggle-label"><i class="fa-solid fa-volume-high" style="color:var(--primary)"></i> Auto-Speak</span>
-                <button class="toggle-switch on" id="togSpeak" onclick="toggleFeature('speak')"></button>
-            </div>
-            <div class="toggle-row">
-                <span class="toggle-label"><i class="fa-solid fa-forward-fast" style="color:var(--primary)"></i> Auto-Navigate</span>
-                <button class="toggle-switch on" id="togAutoNav" onclick="toggleFeature('autoNav')"></button>
-            </div>
+        <div class="toggle-row">
+          <span class="toggle-label"><i class="fa-solid fa-moon" style="color:var(--primary)"></i> Dark Mode</span>
+          <button class="toggle-switch" id="togDark" onclick="toggleFeature('dark')"></button>
         </div>
+        <div class="toggle-row">
+          <span class="toggle-label"><i class="fa-solid fa-volume-high" style="color:var(--primary)"></i>
+            Auto-Speak</span>
+          <button class="toggle-switch on" id="togSpeak" onclick="toggleFeature('speak')"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label"><i class="fa-solid fa-forward-fast" style="color:var(--primary)"></i>
+            Auto-Navigate</span>
+          <button class="toggle-switch on" id="togAutoNav" onclick="toggleFeature('autoNav')"></button>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ CENTER ═══ -->
     <div class="center-panel">
-        <div class="conversation" id="conversation"></div>
-        <div class="no-mic-banner" id="noMicBanner">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            Voice input not supported. Use the Type tab below or try Chrome / Edge.
+      <div class="conversation" id="conversation"></div>
+      <div class="no-mic-banner" id="noMicBanner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Voice input not supported. Use the Type tab below or try Chrome / Edge.
+      </div>
+      <div class="mic-bar">
+        <div class="orb-wrap">
+          <div class="orb-ring r1" id="ring1"></div>
+          <div class="orb-ring r2" id="ring2"></div>
+          <button class="orb-btn" id="orbBtn" onclick="toggleListen()" title="Tap to speak">
+            <i class="fa-solid fa-microphone" id="micIcon"></i>
+          </button>
         </div>
-        <div class="mic-bar">
-            <div class="orb-wrap">
-                <div class="orb-ring r1" id="ring1"></div>
-                <div class="orb-ring r2" id="ring2"></div>
-                <button class="orb-btn" id="orbBtn" onclick="toggleListen()" title="Tap to speak">
-                    <i class="fa-solid fa-microphone" id="micIcon"></i>
-                </button>
-            </div>
-            <div class="mic-text-wrap" id="voiceModeUI">
-                <div class="mic-status" id="micStatus">Tap mic to speak</div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
-                    <div class="wave-bars" id="waveBars"><span></span><span></span><span></span><span></span><span></span></div>
-                    <div class="mic-hint" id="micHint">English + 11 Indian languages supported</div>
-                </div>
-            </div>
-            <div class="type-wrap" id="typeModeUI" style="display:none">
-                <input class="type-input" id="typeInput" type="text"
-                    placeholder="Type your request... e.g. show medicines, go home, SOS"
-                    onkeydown="if(event.key==='Enter') sendTyped()">
-                <button class="send-btn" onclick="sendTyped()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
+        <div class="mic-text-wrap" id="voiceModeUI">
+          <div class="mic-status" id="micStatus">Tap mic to speak</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
+            <div class="wave-bars" id="waveBars"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="mic-hint" id="micHint">Supports English & Hindi</div>
+          </div>
         </div>
+        <div class="type-wrap" id="typeModeUI" style="display:none">
+          <input class="type-input" id="typeInput" type="text"
+            placeholder="Type your request... e.g. show medicines, go home, SOS"
+            onkeydown="if(event.key==='Enter') sendTyped()">
+          <button class="send-btn" onclick="sendTyped()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
     </div>
 
-</div>
+  </div>
 
-<script>
-const state={mode:'voice',listening:false,autoSpeak:true,autoNav:true,largeText:false,dark:false,cmds:0,navs:0,acts:0};
-let recognition=null,synth=window.speechSynthesis;
+  <script>
+    const state = { mode: 'voice', listening: false, autoSpeak: true, autoNav: true, largeText: false, dark: false, cmds: 0, navs: 0, acts: 0 };
+    let recognition = null, synth = window.speechSynthesis;
 
-const GREETINGS={
-  en:"Hello! I am your GoldenSage voice assistant. I can help you navigate the app, check medicines, view vitals, and trigger SOS. How can I help you today?",
-  hi:"नमस्ते! मैं आपका GoldenSage सहायक हूँ। मैं ऐप नेविगेट करने, दवाइयाँ देखने, और आपातकाल (SOS) में मदद कर सकता हूँ। आप क्या चाहते हैं?",
-  mr:"नमस्कार! मी तुमचा GoldenSage सहाय्यक आहे. मी तुम्हाला ॲप नेव्हिगेट करण्यात, औषधे पाहण्यात आणि आपत्कालीन SOS मध्ये मदत करू शकतो.",
-  gu:"નમસ્તે! હું GoldenSage સહાયક છું. હું app navigate કરવામાં, દવાઓ જોવા અને SOS મદદ માટે મદદ કરી શકું.",
-  ta:"வணக்கம்! நான் GoldenSage உதவியாளர். செயலியில் வழிநடத்த, மருந்துகள் பார்க்க, vitals பார்க்க, மற்றும் SOS உதவிக்கு நான் இங்கே இருக்கிறேன்.",
-  bn:"নমস্কার! আমি আপনার GoldenSage সহকারী। অ্যাপ নেভিগেট করা, ওষুধ দেখা, ভিটালস দেখা, এবং SOS সহায়তায় আমি সাহায্য করতে পারি।",
-  te:"నమస్కారం! నేను GoldenSage సహాయకుడిని. యాప్‌లో నావిగేట్ చేయడం, మందులు చూడటం, vitals చూడటం, మరియు SOS సహాయం చేయగలను.",
-  kn:"ನಮಸ್ಕಾರ! ನಾನು GoldenSage ಸಹಾಯಕ. ಆ್ಯಪ್‌ನಲ್ಲಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲು, ಔಷಧಿ ನೋಡಲು, vitals ನೋಡಲು ಮತ್ತು SOS ಸಹಾಯಕ್ಕೆ ನಾನು ಇಲ್ಲಿದ್ದೇನೆ.",
-  ml:"നമസ്കാരം! ഞാൻ GoldenSage സഹായകനാണ്. ആപ്പ് നാവിഗേറ്റ് ചെയ്യാൻ, മരുന്നുകൾ കാണാൻ, vitals കാണാൻ, SOS സഹായത്തിന് ഞാൻ ഇവിടെ ഉണ്ടു.",
-  pa:"ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ GoldenSage ਸਹਾਇਕ ਹਾਂ। ਐਪ ਨੇਵੀਗੇਟ ਕਰਨ, ਦਵਾਈਆਂ ਵੇਖਣ, vitals ਵੇਖਣ ਅਤੇ SOS ਵਿੱਚ ਮਦਦ ਕਰਾਂਗਾ।",
-  ur:"السلام علیکم! میں آپ کا GoldenSage معاون ہوں۔ میں ایپ نیویگیٹ کرنے، دوائیں دیکھنے، vitals دیکھنے اور SOS میں مدد کر سکتا ہوں۔",
-  or:"ନମସ୍କାର! ମୁଁ GoldenSage ସହାୟକ। ଆପ୍‌ ନାଭିଗେଟ କରିବା, ଔଷଧ ଦେଖିବା, vitals ଦେଖିବା ଏବଂ SOS ସହାୟତା ପାଇଁ ମୁଁ ଏଠାରେ ଅଛି।"
-};
+    const GREETINGS = {
+      en: "Hello! I am your GoldenSage voice assistant. I can help you navigate the app, check medicines, view vitals, and trigger SOS. How can I help you today?",
+      hi: "नमस्ते! मैं आपका GoldenSage सहायक हूँ। मैं ऐप नेविगेट करने, दवाइयाँ देखने, और आपातकाल (SOS) में मदद कर सकता हूँ। आप क्या चाहते हैं?",
+      mr: "नमस्कार! मी तुमचा GoldenSage सहाय्यक आहे. मी तुम्हाला ॲप नेव्हिगेट करण्यात, औषधे पाहण्यात आणि आपत्कालीन SOS मध्ये मदत करू शकतो.",
+      gu: "નમસ્તે! હું GoldenSage સહાયક છું. હું app navigate કરવામાં, દવાઓ જોવા અને SOS મદદ માટે મદદ કરી શકું.",
+      ta: "வணக்கம்! நான் GoldenSage உதவியாளர். செயலியில் வழிநடத்த, மருந்துகள் பார்க்க, vitals பார்க்க, மற்றும் SOS உதவிக்கு நான் இங்கே இருக்கிறேன்.",
+      bn: "নমস্কার! আমি আপনার GoldenSage সহকারী। অ্যাপ নেভিগেট করা, ওষুধ দেখা, ভিটালস দেখা, এবং SOS সহায়তায় আমি সাহায্য করতে পারি।",
+      te: "నమస్కారం! నేను GoldenSage సహాయకుడిని. యాప్‌లో నావిగేట్ చేయడం, మందులు చూడటం, vitals చూడటం, మరియు SOS సహాయం చేయగలను.",
+      kn: "ನಮಸ್ಕಾರ! ನಾನು GoldenSage ಸಹಾಯಕ. ಆ್ಯಪ್‌ನಲ್ಲಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲು, ಔಷಧಿ ನೋಡಲು, vitals ನೋಡಲು ಮತ್ತು SOS ಸಹಾಯಕ್ಕೆ ನಾನು ಇಲ್ಲಿದ್ದೇನೆ.",
+      ml: "നമസ്കാരം! ഞാൻ GoldenSage സഹായകനാണ്. ആപ്പ് നാവിഗേറ്റ് ചെയ്യാൻ, മരുന്നുകൾ കാണാൻ, vitals കാണാൻ, SOS സഹായത്തിന് ഞാൻ ഇവിടെ ഉണ്ടു.",
+      pa: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ GoldenSage ਸਹਾਇਕ ਹਾਂ। ਐਪ ਨੇਵੀਗੇਟ ਕਰਨ, ਦਵਾਈਆਂ ਵੇਖਣ, vitals ਵੇਖਣ ਅਤੇ SOS ਵਿੱਚ ਮਦਦ ਕਰਾਂਗਾ।",
+      ur: "السلام علیکم! میں آپ کا GoldenSage معاون ہوں۔ میں ایپ نیویگیٹ کرنے، دوائیں دیکھنے، vitals دیکھنے اور SOS میں مدد کر سکتا ہوں۔",
+      or: "ନମସ୍କାର! ମୁଁ GoldenSage ସହାୟକ। ଆପ୍‌ ନାଭିଗେଟ କରିବା, ଔଷଧ ଦେଖିବା, vitals ଦେଖିବା ଏବଂ SOS ସହାୟତା ପାଇଁ ମୁଁ ଏଠାରେ ଅଛି।"
+    };
 
-const ACTION_META={
-  'NAVIGATE_HOME':          {icon:'🏠',label:'Go to My Day',            cls:''},
-  'NAVIGATE_MEDICINE':      {icon:'💊',label:'Open Medicines',           cls:''},
-  'NAVIGATE_PROFILE':       {icon:'👤',label:'Open My Profile',          cls:''},
-  'NAVIGATE_CONNECTIONS':   {icon:'🤝',label:'Go to Connections',        cls:''},
-  'NAVIGATE_NOTIFICATIONS': {icon:'🔔',label:'Open Notifications',       cls:''},
-  'NAVIGATE_GUARDIAN_HOME': {icon:'🛡️',label:'Guardian Dashboard',       cls:''},
-  'NAVIGATE_DAILY_UPDATES': {icon:'📊',label:'Daily Updates',            cls:''},
-  'NAVIGATE_PATIENT_PROFILE':{icon:'👤',label:'Patient Profile',         cls:''},
-  'NAVIGATE_PREFERENCES':   {icon:'⚙️',label:'Preferences',              cls:''},
-  'TRIGGER_SOS':            {icon:'🚨',label:'Send SOS Emergency NOW',   cls:'danger'},
-  'TRIGGER_REFILL':         {icon:'🔄',label:'Request Medicine Refill',  cls:''},
-  'PRINT_REPORT':           {icon:'🖨️',label:'Print Medical Report',     cls:''},
-  'OPEN_SETTINGS':          {icon:'⚙️',label:'Open Settings',            cls:''},
-  'LOGOUT':                 {icon:'🚪',label:'Log Out',                  cls:'danger'},
-};
+    const ACTION_META = {
+      'NAVIGATE_HOME': { icon: '🏠', label: 'Go to My Day', cls: '' },
+      'NAVIGATE_MEDICINE': { icon: '💊', label: 'Open Medicines', cls: '' },
+      'NAVIGATE_PROFILE': { icon: '👤', label: 'Open My Profile', cls: '' },
+      'NAVIGATE_CONNECTIONS': { icon: '🤝', label: 'Go to Connections', cls: '' },
+      'NAVIGATE_NOTIFICATIONS': { icon: '🔔', label: 'Open Notifications', cls: '' },
+      'NAVIGATE_GUARDIAN_HOME': { icon: '🛡️', label: 'Guardian Dashboard', cls: '' },
+      'NAVIGATE_DAILY_UPDATES': { icon: '📊', label: 'Daily Updates', cls: '' },
+      'NAVIGATE_PATIENT_PROFILE': { icon: '👤', label: 'Patient Profile', cls: '' },
+      'NAVIGATE_PREFERENCES': { icon: '⚙️', label: 'Preferences', cls: '' },
+      'TRIGGER_SOS': { icon: '🚨', label: 'Send SOS Emergency NOW', cls: 'danger' },
+      'TRIGGER_REFILL': { icon: '🔄', label: 'Request Medicine Refill', cls: '' },
+      'PRINT_REPORT': { icon: '🖨️', label: 'Print Medical Report', cls: '' },
+      'OPEN_SETTINGS': { icon: '⚙️', label: 'Open Settings', cls: '' },
+      'LOGOUT': { icon: '🚪', label: 'Log Out', cls: 'danger' },
+    };
 
-function getLangName(){return document.getElementById('langSelect').value}
-function getSrCode(){const s=document.getElementById('langSelect');return s.options[s.selectedIndex].getAttribute('data-sr')||'en-IN'}
-function getLangCode(){return getSrCode().split('-')[0]}
+    function getLangName() { return document.getElementById('langSelect').value }
+    function getSrCode() { const s = document.getElementById('langSelect'); return s.options[s.selectedIndex].getAttribute('data-sr') || 'en-IN' }
+    function getLangCode() { return getSrCode().split('-')[0] }
 
-function onLangChange(){
-  const el=document.getElementById('statLang');if(el)el.textContent=getLangCode().toUpperCase().slice(0,2);
-  const g=GREETINGS[getLangCode()]||GREETINGS.en;
-  appendBotMsg(g,null);
-  if(state.autoSpeak)speakText(g);
-}
-
-function setMode(m){
-  state.mode=m;
-  document.getElementById('modeVoice').classList.toggle('active',m==='voice');
-  document.getElementById('modeType').classList.toggle('active',m==='type');
-  document.getElementById('voiceModeUI').style.display=m==='voice'?'block':'none';
-  document.getElementById('typeModeUI').style.display=m==='type'?'flex':'none';
-  document.getElementById('orbBtn').style.opacity=m==='voice'?'1':'0.35';
-  document.getElementById('orbBtn').style.cursor=m==='voice'?'pointer':'default';
-}
-
-function toggleFeature(f){
-  state[f]=!state[f];
-  const key='tog'+f.charAt(0).toUpperCase()+f.slice(1);
-  document.getElementById(key).classList.toggle('on',state[f]);
-  if(f==='largeText')document.body.style.fontSize=state.largeText?'18px':'';
-  if(f==='dark'){
-    const bg=state.dark?'#0f172a':'',fg=state.dark?'#e2e8f0':'';
-    document.body.style.background=bg;document.body.style.color=fg;
-    ['sidebar','right-panel'].forEach(c=>{const el=document.querySelector('.'+c);if(el)el.style.background=state.dark?'#1e293b':''});
-  }
-}
-
-// Speech recognition
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!SR)document.getElementById('noMicBanner').style.display='block';
-
-function initRecognition(){
-  if(!SR)return null;
-  const r=new SR();r.continuous=false;r.interimResults=true;r.lang=getSrCode();
-  r.onstart=()=>{
-    state.listening=true;
-    document.getElementById('orbBtn').classList.add('live');
-    document.getElementById('micIcon').className='fa-solid fa-stop';
-    document.getElementById('waveBars').classList.add('active');
-    document.getElementById('micStatus').textContent='🔴 Listening...';
-    document.getElementById('micHint').textContent='Speak clearly. I understand you.';
-  };
-  let ft='';
-  r.onresult=(e)=>{
-    let interim='';ft='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal)ft+=e.results[i][0].transcript;
-      else interim+=e.results[i][0].transcript;
+    function onLangChange() {
+      const el = document.getElementById('statLang'); if (el) el.textContent = getLangCode().toUpperCase().slice(0, 2);
+      const g = GREETINGS[getLangCode()] || GREETINGS.en;
+      appendBotMsg(g, null);
+      if (state.autoSpeak) speakText(g);
     }
-    document.getElementById('micHint').textContent='"'+(ft||interim)+'"';
-    if(ft){appendUserMsg(ft);sendToServer(ft);}
-  };
-  r.onerror=(e)=>{stopListening();const m={'no-speech':'No speech. Tap and try again.','not-allowed':'Mic blocked. Allow access.'};document.getElementById('micStatus').textContent=m[e.error]||'Error. Try again.';};
-  r.onend=stopListening;
-  return r;
-}
-function toggleListen(){
-  if(state.mode!=='voice')return;
-  if(state.listening){recognition&&recognition.stop();stopListening();return;}
-  recognition=initRecognition();recognition&&recognition.start();
-}
-function stopListening(){
-  state.listening=false;
-  document.getElementById('orbBtn').classList.remove('live');
-  document.getElementById('micIcon').className='fa-solid fa-microphone';
-  document.getElementById('waveBars').classList.remove('active');
-  document.getElementById('micStatus').textContent='Tap mic to speak';
-  document.getElementById('micHint').textContent='English + 11 Indian languages supported';
-}
 
-// Text input
-function sendTyped(){const i=document.getElementById('typeInput'),t=i.value.trim();if(!t)return;i.value='';appendUserMsg(t);sendToServer(t);}
-function quickSend(t){appendUserMsg(t);sendToServer(t);}
-
-// Server call
-async function sendToServer(text){
-  state.cmds++;const sc=document.getElementById('statCmds');if(sc)sc.textContent=state.cmds;
-  showTyping();
-  try{
-    const res=await fetch('/api/voice/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,lang_name:getLangName()})});
-    const data=await res.json();hideTyping();
-    if(data.error){appendBotMsg('⚠️ '+data.error,null);return;}
-    appendBotMsg(data.reply,data);
-    if(state.autoSpeak)speakText(data.reply);
-    updateLastAction(data);
-    if(data.action&&data.url&&state.autoNav&&data.action!=='TRIGGER_SOS'&&data.action!=='LOGOUT'){
-      setTimeout(()=>executeAction(data),1700);
+    function setMode(m) {
+      state.mode = m;
+      document.getElementById('modeVoice').classList.toggle('active', m === 'voice');
+      document.getElementById('modeType').classList.toggle('active', m === 'type');
+      document.getElementById('voiceModeUI').style.display = m === 'voice' ? 'block' : 'none';
+      document.getElementById('typeModeUI').style.display = m === 'type' ? 'flex' : 'none';
+      document.getElementById('orbBtn').style.opacity = m === 'voice' ? '1' : '0.35';
+      document.getElementById('orbBtn').style.cursor = m === 'voice' ? 'pointer' : 'default';
     }
-  }catch(err){hideTyping();appendBotMsg('⚠️ Connection error. Please try again.',null);}
-}
 
-// Conversation
-function appendUserMsg(text){
-  const conv=document.getElementById('conversation'),now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const row=document.createElement('div');row.className='msg-row user';
-  row.innerHTML=`<div><div class="msg-bubble user">${esc(text)}</div><div class="msg-time">${now}</div></div><div class="msg-avatar user"><i class="fa-solid fa-user"></i></div>`;
-  conv.appendChild(row);conv.scrollTop=conv.scrollHeight;
-}
-function appendBotMsg(text,data){
-  const conv=document.getElementById('conversation'),now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  let pill='';
-  if(data&&data.action&&(data.url||data.action==='PRINT_REPORT')){
-    const m=ACTION_META[data.action]||{icon:'➡️',label:'Go',cls:''};
-    const ds=JSON.stringify(data).replace(/"/g,'&quot;');
-    pill=`<br><button class="action-pill ${m.cls}" onclick='executeAction(${ds})'>${m.icon} ${m.label} &nbsp;<i class="fa-solid fa-arrow-right" style="font-size:.72rem"></i></button>`;
-  }
-  const row=document.createElement('div');row.className='msg-row';
-  row.innerHTML=`<div class="msg-avatar bot">🌸</div><div><div class="msg-bubble bot">${esc(text)}${pill}</div><div class="msg-time">${now}</div></div>`;
-  conv.appendChild(row);conv.scrollTop=conv.scrollHeight;
-}
-function showTyping(){
-  const conv=document.getElementById('conversation');
-  const el=document.createElement('div');el.className='msg-row';el.id='typingEl';
-  el.innerHTML=`<div class="msg-avatar bot">🌸</div><div class="msg-bubble bot"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  conv.appendChild(el);conv.scrollTop=conv.scrollHeight;
-}
-function hideTyping(){const el=document.getElementById('typingEl');if(el)el.remove();}
-
-// Execute action
-function executeAction(data){
-  if(!data||!data.action)return;
-  state.navs++;state.acts++;
-  const sn=document.getElementById('statNavs'),sa=document.getElementById('statActs');
-  if(sn)sn.textContent=state.navs;if(sa)sa.textContent=state.acts;
-
-  if(data.action==='TRIGGER_SOS'){
-    fetch('/feature/sos/trigger',{method:'POST',headers:{'Content-Type':'application/json'}})
-      .then(r=>r.json()).then(d=>{
-        const msg=d.status==='success'?'🚨 SOS sent! Your guardian has been notified immediately. Stay calm — help is on the way.':'⚠️ SOS could not be sent. Please call 112 immediately.';
-        appendBotMsg(msg,null);if(state.autoSpeak)speakText(msg);
-        updateLastAction({action:'TRIGGER_SOS'});
-      });
-    return;
-  }
-  if(data.action==='LOGOUT'){window.location.href=data.url||'/signout';return;}
-  if(data.action==='PRINT_REPORT'){window.print();return;}
-
-  // Same-page tab switch (patient or guardian dashboard)
-  const onPatientDash=window.location.pathname==='/patient-dashboard';
-  const onGuardianDash=window.location.pathname==='/guardian-dashboard';
-  if(data.tab&&(onPatientDash||onGuardianDash)){
-    const tabEl=document.getElementById(data.tab);
-    if(tabEl){
-      document.querySelectorAll('.view-content').forEach(v=>v.classList.remove('active'));
-      tabEl.classList.add('active');
-      document.querySelectorAll('.nav-link').forEach(n=>{
-        n.classList.remove('active');
-        if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes(data.tab))n.classList.add('active');
-      });
-      return;
+    function toggleFeature(f) {
+      state[f] = !state[f];
+      const key = 'tog' + f.charAt(0).toUpperCase() + f.slice(1);
+      document.getElementById(key).classList.toggle('on', state[f]);
+      if (f === 'largeText') document.body.style.fontSize = state.largeText ? '18px' : '';
+      if (f === 'dark') {
+        const bg = state.dark ? '#0f172a' : '', fg = state.dark ? '#e2e8f0' : '';
+        document.body.style.background = bg; document.body.style.color = fg;
+        ['sidebar', 'right-panel'].forEach(c => { const el = document.querySelector('.' + c); if (el) el.style.background = state.dark ? '#1e293b' : '' });
+      }
     }
-  }
-  window.location.href=data.tab?data.url+'#'+data.tab:(data.url||'/patient-dashboard');
-}
 
-function updateLastAction(data){
-  if(!data||!data.action)return;
-  const m=ACTION_META[data.action];if(!m)return;
-  const lac=document.getElementById('lastActionCard');if(lac)lac.innerHTML=`<div class="la-icon">${m.icon}</div><div><div class="la-title">${m.label}</div><div class="la-sub">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>`;
-}
+    // Speech recognition
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) document.getElementById('noMicBanner').style.display = 'block';
 
-function speakText(text){
-  if(!state.autoSpeak||!synth)return;
-  synth.cancel();
-  const utt=new SpeechSynthesisUtterance(text);
-  utt.lang=getSrCode();utt.rate=parseFloat(document.getElementById('speedRange').value);utt.pitch=1.05;utt.volume=1;
-  synth.speak(utt);
-}
+    function initRecognition() {
+      if (!SR) return null;
+      const r = new SR(); r.continuous = false; r.interimResults = true; r.lang = getSrCode();
+      r.onstart = () => {
+        state.listening = true;
+        document.getElementById('orbBtn').classList.add('live');
+        document.getElementById('micIcon').className = 'fa-solid fa-stop';
+        document.getElementById('waveBars').classList.add('active');
+        document.getElementById('micStatus').textContent = '🔴 Listening...';
+        document.getElementById('micHint').textContent = 'Speak clearly. I understand you.';
+      };
+      let ft = '';
+      r.onresult = (e) => {
+        let interim = ''; ft = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) ft += e.results[i][0].transcript;
+          else interim += e.results[i][0].transcript;
+        }
+        document.getElementById('micHint').textContent = '"' + (ft || interim) + '"';
+        if (ft) { appendUserMsg(ft); sendToServer(ft); }
+      };
+      r.onerror = (e) => { stopListening(); const m = { 'no-speech': 'No speech. Tap and try again.', 'not-allowed': 'Mic blocked. Allow access.' }; document.getElementById('micStatus').textContent = m[e.error] || 'Error. Try again.'; };
+      r.onend = stopListening;
+      return r;
+    }
+    function toggleListen() {
+      if (state.mode !== 'voice') return;
+      if (state.listening) { recognition && recognition.stop(); stopListening(); return; }
+      recognition = initRecognition(); recognition && recognition.start();
+    }
+    function stopListening() {
+      state.listening = false;
+      document.getElementById('orbBtn').classList.remove('live');
+      document.getElementById('micIcon').className = 'fa-solid fa-microphone';
+      document.getElementById('waveBars').classList.remove('active');
+      document.getElementById('micStatus').textContent = 'Tap mic to speak';
+      document.getElementById('micHint').textContent = 'Supports English & Hindi';
+    }
 
-function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    // Text input
+    function sendTyped() { const i = document.getElementById('typeInput'), t = i.value.trim(); if (!t) return; i.value = ''; appendUserMsg(t); sendToServer(t); }
+    function quickSend(t) { appendUserMsg(t); sendToServer(t); }
 
-function toggleSidebar(){
-  const sb=document.getElementById('sidebar'),ov=document.getElementById('sidebarOverlay');
-  if(!sb)return;
-  sb.classList.toggle('open');
-  if(ov)ov.classList.toggle('open');
-  document.body.style.overflow=sb.classList.contains('open')?'hidden':'';
-}
+    // Server call
+    async function sendToServer(text) {
+      state.cmds++; const sc = document.getElementById('statCmds'); if (sc) sc.textContent = state.cmds;
+      showTyping();
+      try {
+        const res = await fetch('/api/voice/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, lang_name: getLangName() }) });
+        const data = await res.json(); hideTyping();
+        if (data.error) { appendBotMsg('⚠️ ' + data.error, null); return; }
+        appendBotMsg(data.reply, data);
+        if (state.autoSpeak) speakText(data.reply);
+        updateLastAction(data);
+        if (data.action && data.url && state.autoNav && data.action !== 'TRIGGER_SOS' && data.action !== 'LOGOUT') {
+          setTimeout(() => executeAction(data), 1700);
+        }
+      } catch (err) { hideTyping(); appendBotMsg('⚠️ Connection error. Please try again.', null); }
+    }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  const g=GREETINGS.en;
-  setTimeout(()=>{appendBotMsg(g,null);if(state.autoSpeak)speakText(g);},400);
-  const hash=window.location.hash.replace('#','');
-  if(hash)setTimeout(()=>quickSend('go to '+hash),900);
-});
-</script>
+    // Conversation
+    function appendUserMsg(text) {
+      const conv = document.getElementById('conversation'), now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const row = document.createElement('div'); row.className = 'msg-row user';
+      row.innerHTML = `<div><div class="msg-bubble user">${esc(text)}</div><div class="msg-time">${now}</div></div><div class="msg-avatar user"><i class="fa-solid fa-user"></i></div>`;
+      conv.appendChild(row); conv.scrollTop = conv.scrollHeight;
+    }
+    function appendBotMsg(text, data) {
+      const conv = document.getElementById('conversation'), now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      let pill = '';
+      if (data && data.action && (data.url || data.action === 'PRINT_REPORT')) {
+        const m = ACTION_META[data.action] || { icon: '➡️', label: 'Go', cls: '' };
+        const ds = JSON.stringify(data).replace(/"/g, '&quot;');
+        pill = `<br><button class="action-pill ${m.cls}" onclick='executeAction(${ds})'>${m.icon} ${m.label} &nbsp;<i class="fa-solid fa-arrow-right" style="font-size:.72rem"></i></button>`;
+      }
+      const row = document.createElement('div'); row.className = 'msg-row';
+      row.innerHTML = `<div class="msg-avatar bot">🌸</div><div><div class="msg-bubble bot">${esc(text)}${pill}</div><div class="msg-time">${now}</div></div>`;
+      conv.appendChild(row); conv.scrollTop = conv.scrollHeight;
+    }
+    function showTyping() {
+      const conv = document.getElementById('conversation');
+      const el = document.createElement('div'); el.className = 'msg-row'; el.id = 'typingEl';
+      el.innerHTML = `<div class="msg-avatar bot">🌸</div><div class="msg-bubble bot"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+      conv.appendChild(el); conv.scrollTop = conv.scrollHeight;
+    }
+    function hideTyping() { const el = document.getElementById('typingEl'); if (el) el.remove(); }
+
+    // Execute action
+    function executeAction(data) {
+      if (!data || !data.action) return;
+      state.navs++; state.acts++;
+      const sn = document.getElementById('statNavs'), sa = document.getElementById('statActs');
+      if (sn) sn.textContent = state.navs; if (sa) sa.textContent = state.acts;
+
+      if (data.action === 'TRIGGER_SOS') {
+        fetch('/feature/sos/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+          .then(r => r.json()).then(d => {
+            const msg = d.status === 'success' ? '🚨 SOS sent! Your guardian has been notified immediately. Stay calm — help is on the way.' : '⚠️ SOS could not be sent. Please call 112 immediately.';
+            appendBotMsg(msg, null); if (state.autoSpeak) speakText(msg);
+            updateLastAction({ action: 'TRIGGER_SOS' });
+          });
+        return;
+      }
+      if (data.action === 'LOGOUT') { window.location.href = data.url || '/signout'; return; }
+      if (data.action === 'PRINT_REPORT') { window.print(); return; }
+
+      // Same-page tab switch (patient or guardian dashboard)
+      const onPatientDash = window.location.pathname === '/patient-dashboard';
+      const onGuardianDash = window.location.pathname === '/guardian-dashboard';
+      if (data.tab && (onPatientDash || onGuardianDash)) {
+        const tabEl = document.getElementById(data.tab);
+        if (tabEl) {
+          document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+          tabEl.classList.add('active');
+          document.querySelectorAll('.nav-link').forEach(n => {
+            n.classList.remove('active');
+            if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(data.tab)) n.classList.add('active');
+          });
+          return;
+        }
+      }
+      window.location.href = data.tab ? data.url + '#' + data.tab : (data.url || '/patient-dashboard');
+    }
+
+    function updateLastAction(data) {
+      if (!data || !data.action) return;
+      const m = ACTION_META[data.action]; if (!m) return;
+      const lac = document.getElementById('lastActionCard'); if (lac) lac.innerHTML = `<div class="la-icon">${m.icon}</div><div><div class="la-title">${m.label}</div><div class="la-sub">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div></div>`;
+    }
+
+    function speakText(text) {
+      if (!state.autoSpeak || !synth) return;
+      synth.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = getSrCode(); utt.rate = parseFloat(document.getElementById('speedRange').value); utt.pitch = 1.05; utt.volume = 1;
+      synth.speak(utt);
+    }
+
+    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar'), ov = document.getElementById('sidebarOverlay');
+      if (!sb) return;
+      sb.classList.toggle('open');
+      if (ov) ov.classList.toggle('open');
+      document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const g = GREETINGS.en;
+      setTimeout(() => { appendBotMsg(g, null); if (state.autoSpeak) speakText(g); }, 400);
+      const hash = window.location.hash.replace('#', '');
+      if (hash) setTimeout(() => quickSend('go to ' + hash), 900);
+    });
+  </script>
 </body>
+
 </html>

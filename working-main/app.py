@@ -832,7 +832,7 @@ User ({role}) said: "{user_text}"
             raw = raw.replace('```json', '').replace('```', '').strip()
             result = _json.loads(raw)
         else:
-            result = _voice_fallback(user_text, role)
+            result = _voice_fallback(user_text, role, lang_name)
 
         action = result.get('action') or 'null'
 
@@ -866,36 +866,104 @@ User ({role}) said: "{user_text}"
         return jsonify({'reply': 'I had a small problem. Please try again.', 'action': None, 'url': None, 'tab': None})
 
 
-def _voice_fallback(text, role):
+def _voice_fallback(text, role, lang_name='English'):
     """Keyword fallback when no Gemini API key is configured."""
     t = text.lower()
-    if any(w in t for w in ['sos', 'emergency', 'help', 'danger', 'bachao', 'madad', 'alarm']):
-        return {'reply': 'Sending SOS to your guardian now!', 'action': 'TRIGGER_SOS', 'confidence': .95}
+    
+    translations = {
+        'TRIGGER_SOS': {
+            'English': 'Sending SOS to your guardian now!',
+            'Hindi': 'आपके अभिभावक को आपातकालीन संदेश भेजा जा रहा है!'
+        },
+        'LOGOUT': {
+            'English': 'Logging you out.',
+            'Hindi': 'आपको लॉग आउट किया जा रहा है।'
+        },
+        'NAVIGATE_NOTIFICATIONS': {
+            'English': 'Opening Notifications.',
+            'Hindi': 'सूचनाएं खोली जा रही हैं।'
+        },
+        'NAVIGATE_CONNECTIONS': {
+            'English': 'Going to Connections.',
+            'Hindi': 'कनेक्शन पर जाया जा रहा है।'
+        },
+        'PRINT_REPORT': {
+            'English': 'Printing the medical report now.',
+            'Hindi': 'मेडिकल रिपोर्ट प्रिंट की जा रही है।'
+        },
+        'OPEN_SETTINGS': {
+            'English': 'Opening settings.',
+            'Hindi': 'सेटिंग्स खोली जा रही हैं।'
+        },
+        'NAVIGATE_DAILY_UPDATES': {
+            'English': 'Opening Daily Updates.',
+            'Hindi': 'दैनिक अपडेट खोले जा रहे हैं।'
+        },
+        'NAVIGATE_PATIENT_PROFILE': {
+            'English': 'Opening Patient Profile.',
+            'Hindi': 'रोगी प्रोफ़ाइल खोली जा रही है।'
+        },
+        'NAVIGATE_PREFERENCES': {
+            'English': 'Opening Preferences.',
+            'Hindi': 'प्राथमिकताएं खोली जा रही हैं।'
+        },
+        'NAVIGATE_GUARDIAN_HOME': {
+            'English': 'Taking you to the Guardian Dashboard.',
+            'Hindi': 'आपको अभिभावक डैशबोर्ड पर ले जाया जा रहा है।'
+        },
+        'NAVIGATE_MEDICINE': {
+            'English': 'Opening your medicines.',
+            'Hindi': 'आपकी दवाइयां खोली जा रही हैं।'
+        },
+        'NAVIGATE_PROFILE': {
+            'English': 'Opening your profile.',
+            'Hindi': 'आपकी प्रोफ़ाइल खोली जा रही है।'
+        },
+        'NAVIGATE_HOME': {
+            'English': 'Taking you home.',
+            'Hindi': 'आपको घर ले जाया जा रहा है।'
+        },
+        'DEFAULT': {
+            'English': "I'm here! Try: go home, medicines, my profile, notifications, or SOS.",
+            'Hindi': "मैं यहाँ हूँ! प्रयास करें: घर जाएं, दवाइयां, मेरी प्रोफ़ाइल, सूचनाएं, या SOS।"
+        }
+    }
+
+    def get_msg(action_key, default_lang='English'):
+        if lang_name not in translations.get(action_key, {}):
+            return translations[action_key].get(default_lang)
+        return translations[action_key].get(lang_name)
+
+    if any(w in t for w in ['sos', 'emergency', 'help', 'danger', 'bachao', 'madad', 'alarm', 'sahayta']):
+        return {'reply': get_msg('TRIGGER_SOS'), 'action': 'TRIGGER_SOS', 'confidence': .95}
     if any(w in t for w in ['logout', 'log out', 'sign out', 'bahar', 'niklo']):
-        return {'reply': 'Logging you out.', 'action': 'LOGOUT', 'confidence': .9}
+        return {'reply': get_msg('LOGOUT'), 'action': 'LOGOUT', 'confidence': .9}
     if any(w in t for w in ['notif', 'alert', 'reminder', 'suchna', 'suchnaye']):
-        return {'reply': 'Opening Notifications.', 'action': 'NAVIGATE_NOTIFICATIONS', 'confidence': .9}
-    if any(w in t for w in ['connect', 'volunteer', 'unity', 'ngo', 'community', 'jodo']):
-        return {'reply': 'Going to Connections.', 'action': 'NAVIGATE_CONNECTIONS', 'confidence': .9}
+        return {'reply': get_msg('NAVIGATE_NOTIFICATIONS'), 'action': 'NAVIGATE_NOTIFICATIONS', 'confidence': .9}
+    if any(w in t for w in ['connect', 'volunteer', 'unity', 'ngo', 'community', 'jodo', 'sampark']):
+        return {'reply': get_msg('NAVIGATE_CONNECTIONS'), 'action': 'NAVIGATE_CONNECTIONS', 'confidence': .9}
+    
     if role == 'guardian':
-        if any(w in t for w in ['print', 'report', 'medical']):
-            return {'reply': 'Printing the medical report now.', 'action': 'PRINT_REPORT', 'confidence': .9}
-        if any(w in t for w in ['setting', 'dark', 'mode', 'preference']):
-            return {'reply': 'Opening settings.', 'action': 'OPEN_SETTINGS', 'confidence': .9}
-        if any(w in t for w in ['vital', 'update', 'daily', 'blood', 'heart', 'pressure', 'sugar']):
-            return {'reply': 'Opening Daily Updates.', 'action': 'NAVIGATE_DAILY_UPDATES', 'confidence': .9}
-        if any(w in t for w in ['patient profile', 'identity', 'record', 'allergy']):
-            return {'reply': 'Opening Patient Profile.', 'action': 'NAVIGATE_PATIENT_PROFILE', 'confidence': .9}
-        if any(w in t for w in ['preference', 'prefer']):
-            return {'reply': 'Opening Preferences.', 'action': 'NAVIGATE_PREFERENCES', 'confidence': .9}
-        return {'reply': 'Taking you to the Guardian Dashboard.', 'action': 'NAVIGATE_GUARDIAN_HOME', 'confidence': .7}
-    if any(w in t for w in ['medicine', 'medic', 'dawa', 'dawai', 'pill', 'tablet', 'pharmacy', 'dava', 'refill']):
-        return {'reply': 'Opening your medicines.', 'action': 'NAVIGATE_MEDICINE', 'confidence': .9}
-    if any(w in t for w in ['profile', 'account', 'personal', 'mera', 'details']):
-        return {'reply': 'Opening your profile.', 'action': 'NAVIGATE_PROFILE', 'confidence': .9}
+        if any(w in t for w in ['print', 'report', 'medical', 'chhapo', 'report dekhao']):
+            return {'reply': get_msg('PRINT_REPORT'), 'action': 'PRINT_REPORT', 'confidence': .9}
+        if any(w in t for w in ['setting', 'dark', 'mode', 'preference', 'vyavastha']):
+            return {'reply': get_msg('OPEN_SETTINGS'), 'action': 'OPEN_SETTINGS', 'confidence': .9}
+        if any(w in t for w in ['vital', 'update', 'daily', 'blood', 'heart', 'pressure', 'sugar', 'dhadkan', 'khoon']):
+            return {'reply': get_msg('NAVIGATE_DAILY_UPDATES'), 'action': 'NAVIGATE_DAILY_UPDATES', 'confidence': .9}
+        if any(w in t for w in ['patient profile', 'identity', 'record', 'allergy', 'mareez', 'rogi']):
+            return {'reply': get_msg('NAVIGATE_PATIENT_PROFILE'), 'action': 'NAVIGATE_PATIENT_PROFILE', 'confidence': .9}
+        if any(w in t for w in ['preference', 'prefer', 'pasand']):
+            return {'reply': get_msg('NAVIGATE_PREFERENCES'), 'action': 'NAVIGATE_PREFERENCES', 'confidence': .9}
+        return {'reply': get_msg('NAVIGATE_GUARDIAN_HOME'), 'action': 'NAVIGATE_GUARDIAN_HOME', 'confidence': .7}
+    
+    if any(w in t for w in ['medicine', 'medic', 'dawa', 'dawai', 'pill', 'tablet', 'pharmacy', 'dava', 'refill', 'ilaj']):
+        return {'reply': get_msg('NAVIGATE_MEDICINE'), 'action': 'NAVIGATE_MEDICINE', 'confidence': .9}
+    if any(w in t for w in ['profile', 'account', 'personal', 'mera', 'details', 'khata']):
+        return {'reply': get_msg('NAVIGATE_PROFILE'), 'action': 'NAVIGATE_PROFILE', 'confidence': .9}
     if any(w in t for w in ['home', 'dashboard', 'ghar', 'my day', 'aaj', 'today', 'main']):
-        return {'reply': 'Taking you home.', 'action': 'NAVIGATE_HOME', 'confidence': .9}
-    return {'reply': "I'm here! Try: go home, medicines, my profile, notifications, or SOS.", 'action': None, 'confidence': .2}
+        return {'reply': get_msg('NAVIGATE_HOME'), 'action': 'NAVIGATE_HOME', 'confidence': .9}
+    
+    return {'reply': get_msg('DEFAULT'), 'action': None, 'confidence': .2}
 
 
 if __name__ == "__main__":
