@@ -10,8 +10,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from bson.objectid import ObjectId
 from datetime import datetime
 from modals import User, create_guardian, create_patient, create_notification, create_unity_user, create_appointment
-
-# 1. Setup and Configurations
+from twilio.rest import Client
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
@@ -667,6 +666,49 @@ def sos_trigger():
         
         print(f"🚨 SOS ALERT TRIGGERED: Patient {patient.get('name')} (ID: {patient_id})")
         
+        # --- SEND TWILIO SMS ---
+        try:
+            twilio_account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+            twilio_auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+            twilio_phone_number = os.getenv('TWILIO_PHONE_NUMBER')
+            twilio_messaging_service_sid = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
+            
+            emergency_contact = os.getenv('EMERGENCY_CONTACT_NUMBER')
+            hospital_contact = os.getenv('HOSPITAL_CONTACT_NUMBER')
+            
+            # Use patient's phone number as fallback if EMERGENCY_CONTACT_NUMBER is not set
+            if not emergency_contact and patient.get('phone'):
+                emergency_contact = patient.get('phone')
+            
+            contacts_to_notify = []
+            if emergency_contact: contacts_to_notify.append(emergency_contact)
+            if hospital_contact: contacts_to_notify.append(hospital_contact)
+            
+            if twilio_account_sid and twilio_auth_token and contacts_to_notify and (twilio_phone_number or twilio_messaging_service_sid):
+                client = Client(twilio_account_sid, twilio_auth_token)
+                
+                msg_kwargs_base = {
+                    "body": f"🚨 GOLDENSAGE EMERGENCY 🚨\nAlert from: {patient.get('name')}\nLogin to Guardian Dashboard immediately for more details."
+                }
+                
+                if twilio_messaging_service_sid:
+                    msg_kwargs_base["messaging_service_sid"] = twilio_messaging_service_sid
+                else:
+                    msg_kwargs_base["from_"] = twilio_phone_number
+
+                for contact in set(contacts_to_notify): # set() prevents duplicate texts if numbers are the same
+                    try:
+                        kwargs = msg_kwargs_base.copy()
+                        kwargs["to"] = contact
+                        sms_message = client.messages.create(**kwargs)
+                        print(f"SMS sent successfully to {contact}! SID: {sms_message.sid}")
+                    except Exception as e:
+                        print(f"Failed to send SMS to {contact}: {e}")
+            else:
+                print("Twilio credentials or contact numbers missing. SMS not sent.")
+        except Exception as sms_error:
+            print(f"Failed to initialize Twilio client: {sms_error}")
+        
         return jsonify({
             "status": "success",
             "message": "Emergency alert sent to your guardian",
@@ -794,7 +836,12 @@ APP SECTIONS:
 """
     }
 
-    prompt = f"""
+    # Intercept ADD_REMINDER before hitting Gemini if fallback detected it
+    fallback_result = _voice_fallback(user_text, role, lang_name)
+    if fallback_result.get('action') == 'ADD_REMINDER':
+        result = fallback_result
+    else:
+        prompt = f"""
 You are GoldenSage Voice Assistant — embedded inside the GoldenSage senior health web app in India.
 You are speaking directly to a {role.upper()} user.
 You must respond ONLY in {lang_name}. Be warm, gentle, patient — this is likely an elderly user or their caregiver.
@@ -827,14 +874,26 @@ User ({role}) said: "{user_text}"
 """
 
     try:
-        if _voice_model:
-            raw = _voice_model.generate_content(prompt).text.strip()
-            raw = raw.replace('```json', '').replace('```', '').strip()
-            result = _json.loads(raw)
-        else:
-            result = _voice_fallback(user_text, role, lang_name)
+        # If fallback already handled it (e.g. ADD_REMINDER), skip Gemini text generation
+        if not locals().get('result'):
+            if _voice_model:
+                raw = _voice_model.generate_content(prompt).text.strip()
+                raw = raw.replace('```json', '').replace('```', '').strip()
+                result = _json.loads(raw)
+            else:
+                result = fallback_result
 
         action = result.get('action') or 'null'
+        
+        # Save reminder to database
+        if action == 'ADD_REMINDER':
+            mongo.db.tasks.insert_one({
+                'patient_id': current_user.id,
+                'title': 'Voice Reminder',
+                'description': user_text,
+                'date': datetime.utcnow().strftime('%Y-%m-%d'),
+                'is_completed': False
+            })
 
         ACTION_ROUTES = {
             'NAVIGATE_HOME': ('/patient-dashboard', 'p-home'),
@@ -873,59 +932,78 @@ def _voice_fallback(text, role, lang_name='English'):
     translations = {
         'TRIGGER_SOS': {
             'English': 'Sending SOS to your guardian now!',
-            'Hindi': 'आपके अभिभावक को आपातकालीन संदेश भेजा जा रहा है!'
+            'Hindi': 'आपके अभिभावक को आपातकालीन संदेश भेजा जा रहा है!',
+            'Marathi': 'तुमच्या पालकांना आणीबाणीचा संदेश पाठवला जात आहे!'
         },
         'LOGOUT': {
             'English': 'Logging you out.',
-            'Hindi': 'आपको लॉग आउट किया जा रहा है।'
+            'Hindi': 'आपको लॉग आउट किया जा रहा है।',
+            'Marathi': 'तुम्हाला लॉग आउट केले जात आहे.'
         },
         'NAVIGATE_NOTIFICATIONS': {
             'English': 'Opening Notifications.',
-            'Hindi': 'सूचनाएं खोली जा रही हैं।'
+            'Hindi': 'सूचनाएं खोली जा रही हैं।',
+            'Marathi': 'सूचना उघडत आहे.'
         },
         'NAVIGATE_CONNECTIONS': {
             'English': 'Going to Connections.',
-            'Hindi': 'कनेक्शन पर जाया जा रहा है।'
+            'Hindi': 'कनेक्शन पर जाया जा रहा है।',
+            'Marathi': 'कनेक्शनवर जात आहे.'
         },
         'PRINT_REPORT': {
             'English': 'Printing the medical report now.',
-            'Hindi': 'मेडिकल रिपोर्ट प्रिंट की जा रही है।'
+            'Hindi': 'मेडिकल रिपोर्ट प्रिंट की जा रही है।',
+            'Marathi': 'वैद्यकीय अहवाल मुद्रित करत आहे.'
         },
         'OPEN_SETTINGS': {
             'English': 'Opening settings.',
-            'Hindi': 'सेटिंग्स खोली जा रही हैं।'
+            'Hindi': 'सेटिंग्स खोली जा रही हैं।',
+            'Marathi': 'सेटिंग्ज उघडत आहे.'
         },
         'NAVIGATE_DAILY_UPDATES': {
             'English': 'Opening Daily Updates.',
-            'Hindi': 'दैनिक अपडेट खोले जा रहे हैं।'
+            'Hindi': 'दैनिक अपडेट खोले जा रहे हैं।',
+            'Marathi': 'दैनिक अद्यतने उघडत आहे.'
         },
         'NAVIGATE_PATIENT_PROFILE': {
             'English': 'Opening Patient Profile.',
-            'Hindi': 'रोगी प्रोफ़ाइल खोली जा रही है।'
+            'Hindi': 'रोगी प्रोफ़ाइल खोली जा रही है।',
+            'Marathi': 'रुग्ण प्रोफाइल उघडत आहे.'
         },
         'NAVIGATE_PREFERENCES': {
             'English': 'Opening Preferences.',
-            'Hindi': 'प्राथमिकताएं खोली जा रही हैं।'
+            'Hindi': 'प्राथमिकताएं खोली जा रही हैं।',
+            'Marathi': 'प्राधान्ये उघडत आहे.'
         },
         'NAVIGATE_GUARDIAN_HOME': {
             'English': 'Taking you to the Guardian Dashboard.',
-            'Hindi': 'आपको अभिभावक डैशबोर्ड पर ले जाया जा रहा है।'
+            'Hindi': 'आपको अभिभावक डैशबोर्ड पर ले जाया जा रहा है।',
+            'Marathi': 'तुम्हाला पालक डॅशबोर्डवर नेत आहे.'
         },
         'NAVIGATE_MEDICINE': {
             'English': 'Opening your medicines.',
-            'Hindi': 'आपकी दवाइयां खोली जा रही हैं।'
+            'Hindi': 'आपकी दवाइयां खोली जा रही हैं।',
+            'Marathi': 'तुमची औषधे उघडत आहे.'
         },
         'NAVIGATE_PROFILE': {
             'English': 'Opening your profile.',
-            'Hindi': 'आपकी प्रोफ़ाइल खोली जा रही है।'
+            'Hindi': 'आपकी प्रोफ़ाइल खोली जा रही है।',
+            'Marathi': 'तुमचे प्रोफाइल उघडत आहे.'
         },
         'NAVIGATE_HOME': {
             'English': 'Taking you home.',
-            'Hindi': 'आपको घर ले जाया जा रहा है।'
+            'Hindi': 'आपको घर ले जाया जा रहा है।',
+            'Marathi': 'तुम्हाला घरी नेत आहे.'
         },
         'DEFAULT': {
-            'English': "I'm here! Try: go home, medicines, my profile, notifications, or SOS.",
-            'Hindi': "मैं यहाँ हूँ! प्रयास करें: घर जाएं, दवाइयां, मेरी प्रोफ़ाइल, सूचनाएं, या SOS।"
+            'English': "I'm here! Try: go home, medicines, my profile, or notifications.",
+            'Hindi': "मैं यहाँ हूँ! प्रयास करें: घर जाएं, दवाइयां, मेरी प्रोफ़ाइल, या सूचनाएं।",
+            'Marathi': "मी इथे आहे! प्रयत्न करा: घरी जा, औषधे, माझे प्रोफाइल, किंवा सूचना."
+        },
+        'ADD_REMINDER': {
+            'English': "I've added the reminder to your daily tasks!",
+            'Hindi': "मैंने आपके दैनिक कार्यों में रिमाइंडर जोड़ दिया है!",
+            'Marathi': "मी तुमच्या दैनंदिन कामांमध्ये रिमाइंडर जोडले आहे!"
         }
     }
 
@@ -934,34 +1012,46 @@ def _voice_fallback(text, role, lang_name='English'):
             return translations[action_key].get(default_lang)
         return translations[action_key].get(lang_name)
 
-    if any(w in t for w in ['sos', 'emergency', 'help', 'danger', 'bachao', 'madad', 'alarm', 'sahayta']):
+    import re
+    # Match SOS and other emergency words as whole words to prevent false positives from greetings
+    # Ensure it's not matching the greeting "आणि आपत्कालीन SOS मध्ये मदत करू शकतो"
+    sos_pattern = r'\b(sos|emergency|help|danger|alarm|bachao|madad|sahayta|बचाओ|मदद|वाचवा|संकट|एसओएस|એસઓએસ|બચાવો|મદદ|સંકટ|বাঁচাও|সাহায্য|உதவி|காப்பாற்றுங்கள்|సహాయం|కాపాడండి|ಸಹಾಯ|ಕಾಪಾಡಿ|സഹായിക്കൂ|രക്ഷിക്കൂ)\b'
+    
+    # Do not trigger SOS if it is specifically the Marathi Welcome Greeting being sent back to the server.
+    is_marathi_greeting = "मी तुम्हाला ॲप नेव्हिगेट करण्यात, औषधे पाहण्यात आणि आपत्कालीन sos मध्ये मदत करू शकतो" in t
+    
+    if (re.search(sos_pattern, t) or 'এস ও এস' in t or 'एस ओ एस' in t) and not is_marathi_greeting:
         return {'reply': get_msg('TRIGGER_SOS'), 'action': 'TRIGGER_SOS', 'confidence': .95}
-    if any(w in t for w in ['logout', 'log out', 'sign out', 'bahar', 'niklo']):
+        
+    if any(w in t for w in ['logout', 'log out', 'sign out', 'bahar', 'niklo', 'लॉग आउट', 'लॉगआउट', 'बाहेर']):
         return {'reply': get_msg('LOGOUT'), 'action': 'LOGOUT', 'confidence': .9}
-    if any(w in t for w in ['notif', 'alert', 'reminder', 'suchna', 'suchnaye']):
+    if any(w in t for w in ['notif', 'alert', 'reminder', 'suchna', 'suchnaye', 'सूचना', 'अलर्ट']):
         return {'reply': get_msg('NAVIGATE_NOTIFICATIONS'), 'action': 'NAVIGATE_NOTIFICATIONS', 'confidence': .9}
-    if any(w in t for w in ['connect', 'volunteer', 'unity', 'ngo', 'community', 'jodo', 'sampark']):
+    if any(w in t for w in ['connect', 'volunteer', 'unity', 'ngo', 'community', 'jodo', 'sampark', 'क्नेक्ट', 'स्वयंसेवक', 'जोड़ो', 'जोडा']):
         return {'reply': get_msg('NAVIGATE_CONNECTIONS'), 'action': 'NAVIGATE_CONNECTIONS', 'confidence': .9}
     
     if role == 'guardian':
-        if any(w in t for w in ['print', 'report', 'medical', 'chhapo', 'report dekhao']):
+        if any(w in t for w in ['print', 'report', 'medical', 'chhapo', 'report dekhao', 'प्रिंट', 'रिपोर्ट', 'छापा']):
             return {'reply': get_msg('PRINT_REPORT'), 'action': 'PRINT_REPORT', 'confidence': .9}
-        if any(w in t for w in ['setting', 'dark', 'mode', 'preference', 'vyavastha']):
+        if any(w in t for w in ['setting', 'dark', 'mode', 'preference', 'vyavastha', 'सेटिंग', 'व्यवस्था']):
             return {'reply': get_msg('OPEN_SETTINGS'), 'action': 'OPEN_SETTINGS', 'confidence': .9}
-        if any(w in t for w in ['vital', 'update', 'daily', 'blood', 'heart', 'pressure', 'sugar', 'dhadkan', 'khoon']):
+        if any(w in t for w in ['vital', 'update', 'daily', 'blood', 'heart', 'pressure', 'sugar', 'dhadkan', 'khoon', 'विटल्स', 'रक्तचाप', 'अद्यतन', 'अद्यतने']):
             return {'reply': get_msg('NAVIGATE_DAILY_UPDATES'), 'action': 'NAVIGATE_DAILY_UPDATES', 'confidence': .9}
-        if any(w in t for w in ['patient profile', 'identity', 'record', 'allergy', 'mareez', 'rogi']):
+        if any(w in t for w in ['patient profile', 'identity', 'record', 'allergy', 'mareez', 'rogi', 'रोगी', 'मरीज', 'रुग्ण']):
             return {'reply': get_msg('NAVIGATE_PATIENT_PROFILE'), 'action': 'NAVIGATE_PATIENT_PROFILE', 'confidence': .9}
-        if any(w in t for w in ['preference', 'prefer', 'pasand']):
+        if any(w in t for w in ['preference', 'prefer', 'pasand', 'पसंद', 'प्राधान्य']):
             return {'reply': get_msg('NAVIGATE_PREFERENCES'), 'action': 'NAVIGATE_PREFERENCES', 'confidence': .9}
         return {'reply': get_msg('NAVIGATE_GUARDIAN_HOME'), 'action': 'NAVIGATE_GUARDIAN_HOME', 'confidence': .7}
     
-    if any(w in t for w in ['medicine', 'medic', 'dawa', 'dawai', 'pill', 'tablet', 'pharmacy', 'dava', 'refill', 'ilaj']):
+    if any(w in t for w in ['medicine', 'medic', 'dawa', 'dawai', 'pill', 'tablet', 'pharmacy', 'dava', 'refill', 'ilaj', 'दवा', 'दवाई', 'औषध', 'गोळ्या']):
         return {'reply': get_msg('NAVIGATE_MEDICINE'), 'action': 'NAVIGATE_MEDICINE', 'confidence': .9}
-    if any(w in t for w in ['profile', 'account', 'personal', 'mera', 'details', 'khata']):
+    if any(w in t for w in ['profile', 'account', 'personal', 'mera', 'details', 'khata', 'प्रोफ़ाइल', 'खाता', 'प्रोफाइल', 'माहिती']):
         return {'reply': get_msg('NAVIGATE_PROFILE'), 'action': 'NAVIGATE_PROFILE', 'confidence': .9}
-    if any(w in t for w in ['home', 'dashboard', 'ghar', 'my day', 'aaj', 'today', 'main']):
+    if any(w in t for w in ['home', 'dashboard', 'ghar', 'my day', 'aaj', 'today', 'main', 'घर', 'डैशबोर्ड', 'डॅशबोर्ड']):
         return {'reply': get_msg('NAVIGATE_HOME'), 'action': 'NAVIGATE_HOME', 'confidence': .9}
+        
+    if any(w in t for w in ['remind me', 'remind', 'reminder', 'alert', 'set an alert', 'याद दिलाना', 'रिमाइंडर', 'आठवण', 'अलर्ट']):
+        return {'reply': get_msg('ADD_REMINDER'), 'action': 'ADD_REMINDER', 'confidence': .85, 'text': text}
     
     return {'reply': get_msg('DEFAULT'), 'action': None, 'confidence': .2}
 

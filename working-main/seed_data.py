@@ -38,7 +38,7 @@ def seed_database():
     else:
         print(f"Creating Patient: {patient_email}")
         result = db.patients.insert_one({
-            'name': "John Willoughby",
+            'name': "Grandpa",
             'email': patient_email,
             'password': generate_password_hash("password123"),
             'phone': "555-0199",
@@ -109,13 +109,13 @@ def seed_database():
     print("Adding sample notifications...")
     db.notifications.insert_one({
         'user_id': guardian_id,
-        'message': "💊 Grandpa Joe missed his afternoon medication.",
+        'message': "💊 Grandpa missed his afternoon medication.",
         'timestamp': datetime.utcnow(),
         'is_read': False
     })
     db.notifications.insert_one({
         'user_id': guardian_id,
-        'message': "✅ Grandpa Joe completed his morning walk.",
+        'message': "✅ Grandpa completed his morning walk.",
         'timestamp': datetime.utcnow(),
         'is_read': False
     })
@@ -128,12 +128,12 @@ def seed_database():
     print(f"   Email:       demo@guardian.com")
     print(f"   Password:    password123")
     print(f"   Portal:      /login/guardian or /guardian-dashboard")
-    print(f"   Patient:     John Willoughby (72 years old)")
+    print(f"   Patient:     Grandpa (72 years old)")
     print("\n🏥 PATIENT LOGIN")
     print(f"   Email:       grandpa@patient.com")
     print(f"   Password:    password123")
     print(f"   Portal:      /login/patient or /patient-dashboard")
-    print(f"   Name:        John Willoughby")
+    print(f"   Name:        Grandpa")
     print(f"   Phone:       555-0199")
     print("\n📊 DEMO DATA SEEDED:")
     print(f"   ✓ Vitals (3): Heart Rate, BP, Blood Sugar")
