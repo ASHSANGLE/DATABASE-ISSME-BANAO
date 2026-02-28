@@ -2748,7 +2748,8 @@
                     }
 
                     dose.notified = true;
-                    saveAllData(false);
+                    // Fix: Save directly to localStorage to avoid rewriting notified state via UI elements
+                    localStorage.setItem('medicationReminderData', JSON.stringify(data));
                 }
             });
         }
@@ -2921,9 +2922,9 @@
                     alarmAudio.pause();
                     alarmAudio.currentTime = 0;
                 }
-                alarmAudio = new Audio('alarm.mp3');
+                alarmAudio = new Audio('/static/alarm.mp3');
                 alarmAudio.volume = 0.8;
-                alarmAudio.play().catch(() => {});
+                alarmAudio.play().catch(e => console.warn("Alarm sound not available:", e));
             } catch (error) {
                 console.warn("Alarm sound not available:", error);
             }
@@ -2935,8 +2936,10 @@
 
             const options = {
                 body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
                 tag: 'medication-reminder',
-                requireInteraction: true
+                requireInteraction: true,
+                vibrate: [200, 100, 200]
             };
             try {
                 new Notification(title, options);
@@ -3067,6 +3070,10 @@
             const section = document.getElementById(sectionId);
             if (!section) return [];
 
+            const storedData = getStoredData();
+            const sectionName = sectionId.replace('List', '');
+            const currentSectionData = storedData && storedData[sectionName] ? storedData[sectionName] : [];
+
             const medItems = section.querySelectorAll('.med-item');
             const sectionData = [];
 
@@ -3077,13 +3084,24 @@
                 const notesInput = item.querySelector('.med-notes');
                 const takenCheckbox = item.querySelector('.med-taken');
 
+                const time = timeInput ? timeInput.value : '';
+                const name = nameInput ? nameInput.value : '';
+
+                let notified = false;
+                if (name && time) {
+                    const matchingMed = currentSectionData.find(med => med.name === name && med.time === time);
+                    if (matchingMed) {
+                        notified = matchingMed.notified || false;
+                    }
+                }
+
                 sectionData.push({
-                    time: timeInput ? timeInput.value : '',
-                    name: nameInput ? nameInput.value : '',
+                    time,
+                    name,
                     dosage: dosageInput ? dosageInput.value : '',
                     notes: notesInput ? notesInput.value : '',
                     taken: takenCheckbox ? takenCheckbox.checked : false,
-                    notified: false
+                    notified: notified
                 });
             });
             return sectionData;

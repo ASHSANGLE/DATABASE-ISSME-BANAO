@@ -1,0 +1,21 @@
+DEBUGGING THE CONTINUOUS ALARM ISSUE:
+
+To help diagnose the issue:
+
+1. Open the medication reminder page in your browser
+2. Press F12 to open Developer Console
+3. Go to the "Console" tab
+4. Add a test medication with a time from a few minutes ago (e.g., if it's 2:35 PM, set time to 2:33 PM)
+5. Click "Save All Medications"
+6. Wait for the alarm to trigger (should happen within 5 seconds)
+7. When alarm pops up, check the Console tab
+8. Look for logs that say "[Reminder Check]" and "[markMedicationAsTaken]"
+9. Send a screenshot of these logs
+
+KEY LOGS TO LOOK FOR:
+- "[Reminder Check] Dose: MedicationName at HH:MM, taken: false, notified: false" (before taking)
+- "[Reminder TRIGGERED] MedicationName at HH:MM" (alarm shown)
+- "[markMedicationAsTaken] Marked: MedicationName as taken and notified" (after clicking button)
+- "[getSectionData] Preserved notified:true for MedicationName at HH:MM" (next save)
+
+If the alarm keeps popping after clicking, check if the notified flag is being preserved.

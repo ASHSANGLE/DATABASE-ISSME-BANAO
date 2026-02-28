@@ -7,6 +7,8 @@ let notificationPermissionGranted = false;
 let currentAlarm = null;
 let alarmAudioInterval = null;
 let alarmAudio = null;
+let lastAlarmTime = null; // Track when last alarm was shown to prevent multiple in same minute
+let isDismissingAlarm = false; // Protection flag during dismiss
 let currentTimePicker = {
     targetInput: null,
     hour: 8,
@@ -19,6 +21,9 @@ function initializeApp() {
     updateTimeDisplay();
     setInterval(updateTimeDisplay, 1000); // Update time every second
     
+    // Reset notified flags at the start of each day
+    resetDailyNotifications();
+    
     loadAllData();
     
     // Check notification permission status first
@@ -30,6 +35,30 @@ function initializeApp() {
     requestNotificationPermission();
     startReminderCheck();
     updateSummary();
+}
+
+// ==================== DAILY RESET ====================
+
+function resetDailyNotifications() {
+    const today = new Date().toDateString();
+    const lastResetDate = localStorage.getItem('lastNotificationResetDate');
+    
+    // If not reset today, reset all notified flags
+    if (lastResetDate !== today) {
+        const data = getStoredData();
+        if (data) {
+            ['morning', 'afternoon', 'evening', 'bedtime'].forEach(section => {
+                if (data[section]) {
+                    data[section].forEach(med => {
+                        med.notified = false; // Reset notified flag for new day
+                    });
+                }
+            });
+            localStorage.setItem('medicationReminderData', JSON.stringify(data));
+            localStorage.setItem('lastNotificationResetDate', today);
+            console.log('[Daily Reset] Notification flags reset for new day');
+        }
+    }
 }
 
 // ==================== TIME DISPLAY ====================
@@ -92,9 +121,9 @@ function requestNotificationPermission() {
 // ==================== REMINDER CHECKING ====================
 
 function startReminderCheck() {
-    // Check every 30 seconds for more accurate reminders
-    reminderInterval = setInterval(checkReminders, 30000);
-    console.log("Reminder check started - checking every 30 seconds");
+    // Check every 5 seconds for reliable reminders
+    reminderInterval = setInterval(checkReminders, 5000);
+    console.log("Reminder check started - checking every 5 seconds");
 }
 
 function checkReminders() {
@@ -108,20 +137,25 @@ function checkReminders() {
         }
     }
     
-    // Don't show new alarm if one is already active (not snoozed)
-    if (currentAlarm && !currentAlarm.snoozed) {
+    // Don't show alarm if already dismissed or dismissing
+    if (isDismissingAlarm) {
+        console.log('[checkReminders] Skipping - alarm is being dismissed');
         return;
     }
     
     const now = new Date();
-    const currentTime = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-    });
+    // Format current time properly in HH:MM (24-hour) format
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const currentTime = `${hours}:${minutes}`;
+    
+    console.log(`[Reminder Check] Current time: ${currentTime}`);
     
     const data = getStoredData();
-    if (!data) return;
+    if (!data) {
+        console.log('[Reminder Check] No medication data found');
+        return;
+    }
     
     const allDoses = [
         ...(data.morning || []),
@@ -130,12 +164,25 @@ function checkReminders() {
         ...(data.bedtime || [])
     ];
     
+    console.log(`[Reminder Check] Checking ${allDoses.length} medications`);
+    
     allDoses.forEach(dose => {
+        // Debug log
+        console.log(`[Reminder Check] Dose: ${dose.name} at ${dose.time}, taken: ${dose.taken}, notified: ${dose.notified}`);
+        
         // Check if time matches, medication is not taken, and not already notified today
-        // Also check that we're not showing an alarm for this medication already
-        if (dose.time === currentTime && !dose.taken && !dose.notified) {
+        if (dose.time && dose.time === currentTime && !dose.taken && !dose.notified) {
+            console.log(`[Reminder TRIGGERED] ${dose.name} at ${currentTime}`);
+            
+            // Prevent showing same alarm twice in the same minute
+            if (lastAlarmTime === currentTime && currentAlarm && currentAlarm.name === dose.name) {
+                console.log(`[Reminder Check] Already showed alarm for ${dose.name} this minute`);
+                return;
+            }
+            
             // Don't trigger if we already have an active alarm for this medication
             if (currentAlarm && currentAlarm.name === dose.name) {
+                console.log(`[Reminder Check] Alarm already active for ${dose.name}`);
                 return;
             }
             
@@ -150,6 +197,9 @@ function checkReminders() {
             // Show visible and audible alarm
             showVisibleAlarm(medicationInfo);
             
+            // Track this alarm time to prevent repeated alerts this minute
+            lastAlarmTime = currentTime;
+            
             // Also show browser notification
             if (notificationPermissionGranted) {
                 const notificationTitle = `💊 Medication Reminder for ${patientName}`;
@@ -159,7 +209,8 @@ function checkReminders() {
             
             // Mark as notified to prevent duplicate notifications
             dose.notified = true;
-            saveAllData();
+            // Save directly to localStorage without UI rebuild
+            localStorage.setItem('medicationReminderData', JSON.stringify(data));
             
             console.log(`Reminder sent for ${dose.name} at ${currentTime}`);
         }
@@ -193,6 +244,8 @@ function showVisibleAlarm(medicationInfo) {
         
         alarmMessage.innerHTML = message.replace(/\n/g, '<br>');
         alarmBanner.classList.remove('hidden');
+        alarmBanner.style.display = 'block';
+        alarmBanner.style.visibility = 'visible';
         alarmBanner.classList.add('flashing');
         
         // Add class to body for styling
@@ -200,6 +253,9 @@ function showVisibleAlarm(medicationInfo) {
         
         // Scroll to top to show alarm
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Reset the dismissing flag when alarm is shown
+        isDismissingAlarm = false;
         
         // Start playing alarm sound repeatedly
         startAlarmSound();
@@ -232,10 +288,16 @@ function stopAlarmSound() {
 }
 
 function dismissAlarm() {
+    // Set flag to prevent re-triggering
+    isDismissingAlarm = true;
+    
+    // FORCE hide the alarm banner immediately
     const alarmBanner = document.getElementById('alarmBanner');
     if (alarmBanner) {
         alarmBanner.classList.add('hidden');
         alarmBanner.classList.remove('flashing');
+        alarmBanner.style.display = 'none';
+        alarmBanner.style.visibility = 'hidden';
     }
     
     // Remove body class
@@ -249,6 +311,14 @@ function dismissAlarm() {
     }
     
     currentAlarm = null;
+    lastAlarmTime = null;
+    
+    // Reset flag after short delay
+    setTimeout(() => {
+        isDismissingAlarm = false;
+    }, 1000);
+    
+    console.log('[dismissAlarm] Alarm dismissed and locked');
 }
 
 function markMedicationAsTakenInData(medicationName) {
@@ -337,15 +407,13 @@ function playAlarmSound() {
         if (alarmAudio) {
             alarmAudio.pause();
             alarmAudio.currentTime = 0;
-        }
-        
-        alarmAudio = new Audio('alarm.mp3');
-        alarmAudio.volume = 0.8; // Higher volume for visibility
+        alarmAudio = new Audio('/static/alarm.mp3');
+        alarmAudio.volume = 0.8; // Higher volume for alarm
         alarmAudio.play().catch(e => {
             console.warn("Could not play sound:", e);
         });
     } catch (error) {
-        console.warn("Audio file not found or error playing sound:", error);
+        console.warn("Audio file error:", error);
     }
 }
 
@@ -371,7 +439,6 @@ function showNotification(title, body) {
 }
 
 // ==================== MEDICATION MANAGEMENT ====================
-
 function addMedication(timeOfDay) {
     const listContainer = document.getElementById(timeOfDay + 'List');
     if (!listContainer) return;
@@ -381,11 +448,14 @@ function addMedication(timeOfDay) {
     medItem.className = 'med-item';
     medItem.id = 'med-' + medId;
     
+    // Default time in 12-hour format
+    const defaultTime12h = format24To12Hour(8, 0); // 08:00 in 24-hour => 08:00 AM
+    
     medItem.innerHTML = `
         <div class="med-item-row">
             <label>⏰ Time:</label>
             <button type="button" class="time-input-btn" onclick="openTimePicker(this, '08:00')">
-                <span class="time-display-text">08:00</span>
+                <span class="time-display-text">${defaultTime12h}</span>
                 <span>🕐</span>
             </button>
             <input type="hidden" class="med-time" value="08:00" onchange="saveAllData()">
@@ -492,23 +562,43 @@ function getSectionData(sectionId) {
     const section = document.getElementById(sectionId);
     if (!section) return [];
     
+    // Get current stored data to preserve the notified flag
+    const storedData = getStoredData();
+    const sectionName = sectionId.replace('List', '');
+    const currentSectionData = storedData && storedData[sectionName] ? storedData[sectionName] : [];
+    
     const medItems = section.querySelectorAll('.med-item');
     const sectionData = [];
     
-    medItems.forEach(item => {
+    medItems.forEach((item, index) => {
         const timeInput = item.querySelector('.med-time');
         const nameInput = item.querySelector('.med-name');
         const dosageInput = item.querySelector('.med-dosage');
         const notesInput = item.querySelector('.med-notes');
         const takenCheckbox = item.querySelector('.med-taken');
         
+        const time = timeInput ? timeInput.value : '';
+        const name = nameInput ? nameInput.value : '';
+        
+        // Preserve the notified flag by matching BOTH name AND time (more reliable than index)
+        let notified = false;
+        if (name && time) {
+            const matchingMed = currentSectionData.find(
+                med => med.name === name && med.time === time
+            );
+            if (matchingMed) {
+                notified = matchingMed.notified || false;
+                console.log(`[getSectionData] Preserved notified:${notified} for ${name} at ${time}`);
+            }
+        }
+        
         sectionData.push({
-            time: timeInput ? timeInput.value : '',
-            name: nameInput ? nameInput.value : '',
+            time: time,
+            name: name,
             dosage: dosageInput ? dosageInput.value : '',
             notes: notesInput ? notesInput.value : '',
             taken: takenCheckbox ? takenCheckbox.checked : false,
-            notified: false
+            notified: notified
         });
     });
     
@@ -563,11 +653,17 @@ function loadSectionData(sectionId, data) {
         medItem.id = 'med-' + medId;
         
         const timeValue = item.time || '08:00';
+        // Convert time to 12-hour format for display
+        const timeParts = timeValue.split(':');
+        const hour = parseInt(timeParts[0]) || 8;
+        const minute = parseInt(timeParts[1]) || 0;
+        const displayTime = format24To12Hour(hour, minute);
+        
         medItem.innerHTML = `
             <div class="med-item-row">
                 <label>⏰ Time:</label>
                 <button type="button" class="time-input-btn" onclick="openTimePicker(this, '${timeValue}')">
-                    <span class="time-display-text">${timeValue}</span>
+                    <span class="time-display-text">${displayTime}</span>
                     <span>🕐</span>
                 </button>
                 <input type="hidden" class="med-time" value="${timeValue}" onchange="saveAllData()">
@@ -618,6 +714,7 @@ function updateSummary() {
         document.getElementById('totalMeds').textContent = '0';
         document.getElementById('takenMeds').textContent = '0';
         document.getElementById('pendingMeds').textContent = '0';
+        displayUpcomingAlerts();
         return;
     }
     
@@ -635,6 +732,75 @@ function updateSummary() {
     document.getElementById('totalMeds').textContent = total;
     document.getElementById('takenMeds').textContent = taken;
     document.getElementById('pendingMeds').textContent = pending;
+    
+    // Display upcoming alerts
+    displayUpcomingAlerts();
+}
+
+function displayUpcomingAlerts() {
+    const data = getStoredData();
+    const upcomingList = document.getElementById('upcomingAlertsList');
+    
+    if (!upcomingList) return;
+    
+    if (!data) {
+        upcomingList.innerHTML = '<p class="no-alerts">No medications scheduled</p>';
+        return;
+    }
+    
+    // Get all medications with their times
+    const allMeds = [
+        ...(data.morning || []).map(med => ({ ...med, section: 'morning' })),
+        ...(data.afternoon || []).map(med => ({ ...med, section: 'afternoon' })),
+        ...(data.evening || []).map(med => ({ ...med, section: 'evening' })),
+        ...(data.bedtime || []).map(med => ({ ...med, section: 'bedtime' }))
+    ];
+    
+    // Filter out taken medications and sort by time
+    const pendingMeds = allMeds
+        .filter(med => !med.taken)
+        .sort((a, b) => {
+            const timeA = a.time ? a.time.split(':').map(Number) : [0, 0];
+            const timeB = b.time ? b.time.split(':').map(Number) : [0, 0];
+            return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
+        });
+    
+    if (pendingMeds.length === 0) {
+        upcomingList.innerHTML = '<p class="no-alerts">✓ All medications taken for today!</p>';
+        return;
+    }
+    
+    // Get current time
+    const now = new Date();
+    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+    
+    // Build HTML for upcoming medications
+    let html = '';
+    pendingMeds.forEach((med, index) => {
+        const medTime = med.time ? med.time.split(':').map(Number) : [0, 0];
+        const medTimeMinutes = medTime[0] * 60 + medTime[1];
+        
+        // Check if medication is upcoming (within next hour)
+        const isUpcoming = medTimeMinutes >= currentTimeMinutes && medTimeMinutes < currentTimeMinutes + 60;
+        const isSoon = medTimeMinutes === currentTimeMinutes; // Happening now
+        
+        const upcomingClass = isUpcoming ? 'upcoming-soon' : '';
+        const soonClass = isSoon ? 'happening-now' : '';
+        
+        // Display time in 12-hour format
+        const displayTime = format24To12Hour(medTime[0], medTime[1]);
+        
+        html += `
+            <div class="alert-item ${upcomingClass} ${soonClass}">
+                <div class="alert-time">⏰ ${displayTime}</div>
+                <div class="alert-medication">💊 ${escapeHtml(med.name || 'Medication')}</div>
+                ${med.dosage ? `<div class="alert-dosage">📏 ${escapeHtml(med.dosage)}</div>` : ''}
+                ${med.notes ? `<div class="alert-notes">📝 ${escapeHtml(med.notes)}</div>` : ''}
+            </div>
+        `;
+    });
+    
+    upcomingList.innerHTML = html;
 }
 
 function getStoredData() {
@@ -832,18 +998,19 @@ function confirmTimeSelection() {
         return;
     }
     
-    // Format time
+    // Format time in 24-hour format for storage
     const hourStr = String(currentTimePicker.hour).padStart(2, '0');
     const minuteStr = String(currentTimePicker.minute).padStart(2, '0');
     const timeStr = `${hourStr}:${minuteStr}`;
     
-    // Update hidden input
+    // Update hidden input (24-hour format for comparison)
     currentTimePicker.targetInput.value = timeStr;
     
-    // Update button display
+    // Update button display with 12-hour format
     const displayText = currentTimePicker.targetButton.querySelector('.time-display-text');
     if (displayText) {
-        displayText.textContent = timeStr;
+        const displayTime = format24To12Hour(currentTimePicker.hour, currentTimePicker.minute);
+        displayText.textContent = displayTime;
     }
     
     // Save data
@@ -851,5 +1018,17 @@ function confirmTimeSelection() {
     
     // Close modal
     closeTimePicker();
+}
+
+function format24To12Hour(hour, minute) {
+    const hourStr = String(hour).padStart(2, '0');
+    const minuteStr = String(minute).padStart(2, '0');
+    
+    let hour12 = hour % 12;
+    if (hour12 === 0) hour12 = 12;
+    
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12Str = String(hour12).padStart(2, '0');
+    return `${hour12Str}:${minuteStr} ${ampm}`;
 }
 
