@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoldenSage – Patient Setup</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --green: #3a6b3d;
+      --green-light: #d5e8d9;
+      --danger: #d9534f;
+      --card: #fff;
+      --darkblue: #003366;
+      --bg-blue: #C9EBF2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif
+    }
+
+    h2,
+    h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--darkblue)
+    }
+
+    body {
+      margin: 0;
+      padding-top: 80px;
+      background: transparent;
+    }
+
+    .navbar {
+      width: 100%;
+      height: 60px;
+      background: var(--darkblue);
+      color: #fff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      font-size: 22px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+    }
+
+    .navbar .logo-img {}
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: auto;
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: var(--bg-blue);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    }
+
+    .content {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+    }
+
+    .sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .main {
+      flex: 1
+    }
+
+    .card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .profile-pic {
+      text-align: center;
+      margin-bottom: 15px;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .profile-pic img {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 3px solid var(--green-light);
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .profile-info {
+      text-align: center;
+    }
+
+    .profile-info h4 {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .profile-info p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .branding-card {
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .brand-logo {
+      color: #d9534f;
+      font-size: 45px;
+      margin-bottom: 10px;
+    }
+
+    .brand-tagline {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .brand-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    textarea {
+      height: 80px;
+      resize: none;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .checkbox-group label {
+      font-weight: 400;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-group input {
+      width: auto;
+      margin-top: 0;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .reminder-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .add-reminder {
+      text-align: right;
+      font-weight: 600;
+      color: var(--green);
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      font-size: 16px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--darkblue)
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, .35);
+      z-index: -1;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    /* Email Warning */
+    .email-warning {
+      color: var(--danger);
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="navbar">
+    <img src="/assets/nl.jpg" class="logo-img" alt="Logo">
+    <span>GoldenSage</span>
+    <a href="/main">Home</a>
+  </div>
+
+  <video autoplay muted loop id="bgVideo">
+    <source src="/assets/bg4.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+
+  <div class="container">
+    <div class="content">
+
+      <div class="sidebar">
+        <div class="card">
+          <div class="profile-pic">
+            <label for="patientImage">
+              <img id="patientPreview" src="https://via.placeholder.com/130?text=Patient+Pic"
+                title="Upload Patient Image">
+            </label>
+            <input type="file" id="patientImage" style="display: none;" accept="image/*"
+              onchange="previewPatient(event)">
+          </div>
+          <div class="profile-info">
+            <h4 id="patientDisplay">New Patient</h4>
+            <p>Care Profile Setup</p>
+          </div>
+        </div>
+
+        <div class="card branding-card">
+          <div class="brand-logo"><i class="fas fa-heartbeat"></i></div>
+          <h3>Patient Care</h3>
+          <p class="brand-tagline">Personalized monitoring and safety for your loved ones.</p>
+          <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=80"
+            alt="Care" class="brand-img">
+        </div>
+      </div>
+
+      <div class="main">
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-user-shield"></i> Guardian Details</h3>
+          <div class="form-group">
+            <label class="required">Guardian Phone Number</label>
+            <input id="gPhone" type="tel" placeholder="Enter guardian phone number" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Guardian Email ID</label>
+            <input id="gEmail" type="email" placeholder="Enter guardian email" required
+              oninput="checkEmail(this.value)">
+            <div id="emailWarning" class="email-warning">Valid email ID is required (e.g. user@example.com)</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-id-card"></i> Patient Basic Information</h3>
+          <div class="form-group">
+            <label class="required">Patient's Full Name</label>
+            <input id="pName" type="text" placeholder="Enter patient's name" oninput="updateSidebarName()" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Age</label>
+            <input type="number" placeholder="Enter age" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Relation with the Patient</label>
+            <input type="text" placeholder="e.g. Son, Daughter, Spouse" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Gender</label>
+            <div class="radio-group">
+              <label><input type="radio" name="pGender" value="female" required> Female</label>
+              <label><input type="radio" name="pGender" value="male"> Male</label>
+              <label><input type="radio" name="pGender" value="other"> Other</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-notes-medical"></i> Medical Background</h3>
+          <div class="form-group">
+            <label class="required">Blood Group</label>
+            <select required>
+              <option value="">Select Blood Group</option>
+              <option>A+</option>
+              <option>A-</option>
+              <option>B+</option>
+              <option>B-</option>
+              <option>O+</option>
+              <option>O-</option>
+              <option>AB+</option>
+              <option>AB-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Primary Medical Condition</label>
+            <input type="text" placeholder="e.g. Diabetes, Hypertension">
+          </div>
+          <div class="form-group">
+            <label>Allergies (if any)</label>
+            <textarea placeholder="List any known allergies..."></textarea>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-brain"></i> Memory Disorders & Conditions</h3>
+          <div class="form-group">
+            <label class="required">Identify Specific Conditions (Select at least one)</label>
+            <div class="checkbox-group" id="memoryChecklist">
+              <label><input type="checkbox" name="memCond" value="Alzheimer's"> Alzheimer's</label>
+              <label><input type="checkbox" name="memCond" value="Dementia"> Dementia</label>
+              <label><input type="checkbox" name="memCond" value="Amnesia"> Amnesia</label>
+              <label><input type="checkbox" name="memCond" value="Cognitive Impairment"> Cognitive Impairment</label>
+              <label><input type="checkbox" name="memCond" value="Parkinson's"> Parkinson's</label>
+              <label><input type="checkbox" name="memCond" value="Other"> Other Memory Loss</label>
+              <label><input type="checkbox" name="memCond" value="None"> No such condition</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="required">Details on such conditions</label>
+            <textarea id="conditionDetails" placeholder="Please provide details about the conditions checked above..."
+              required></textarea>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-bell"></i> Care Reminders</h3>
+          <div id="reminders"></div>
+          <div class="add-reminder" onclick="addReminder()">+ Add Medication or Task Reminder</div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-file-medical"></i> Upload Medical Reports</h3>
+          <div class="form-group">
+            <input type="file" id="medicalReports" multiple accept=".pdf,image/*"
+              style="padding: 8px; border: 1px dashed var(--darkblue); background: #f9f9f9;">
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-phone-alt"></i> Emergency Care Details</h3>
+          <div class="form-group">
+            <label class="required">Primary Doctor's Name</label>
+            <input type="text" placeholder="Dr. Name" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Doctor's Number</label>
+            <input type="text" placeholder="Doctor's contact number" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Emergency Contact Number</label>
+            <input type="text" placeholder="Primary emergency contact" required>
+          </div>
+          <div class="form-group">
+            <label>Neighbor's Number</label>
+            <input type="text" placeholder="Enter neighbor's phone number">
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3><i class="fas fa-user-shield"></i> Care Preferences</h3>
+          <div class="form-group">
+            <label>Language Preference</label>
+            <input type="text" placeholder="e.g. English, Hindi">
+          </div>
+          <div class="form-group">
+            <label>Hospital Preference</label>
+            <input type="text" placeholder="Preferred hospital name">
+          </div>
+          <div class="form-group">
+            <label>Special Instructions</label>
+            <textarea placeholder="Any specific dietary or mobility instructions..."></textarea>
+          </div>
+        </div>
+        <a href="/signup/guardian">
+          <button class="btn btn-primary" onclick="savePatient()">Create User</button></a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function previewPatient(event) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById('patientPreview').src = reader.result;
+      }
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function updateSidebarName() {
+      const name = document.getElementById('pName').value;
+      document.getElementById('patientDisplay').innerText = name ? name : "New Patient";
+    }
+
+    let reminderCount = 0;
+    function addReminder() {
+      reminderCount++;
+      const d = document.createElement("div");
+      d.className = "reminder-item";
+      d.innerHTML = `<span>${reminderCount}.</span><input placeholder="e.g. Take Medication" required>`;
+      document.getElementById("reminders").appendChild(d);
+    }
+
+    function checkEmail(email) {
+      const warning = document.getElementById("emailWarning");
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !re.test(email)) {
+        warning.style.display = "block";
+      } else {
+        warning.style.display = "none";
+      }
+    }
+
+    function savePatient() {
+      const name = document.getElementById("pName").value;
+      const email = document.getElementById("gEmail").value;
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!re.test(email)) {
+        alert("Please provide a valid email ID.");
+        return;
+      }
+      if (!name) {
+        alert("Please enter the patient's name.");
+        return;
+      }
+
+      alert("Profile created successfully for " + name);
+      window.location.href = "/patient-dashboard";
+    }
+  </script>
+
+</body>
+
+</html>

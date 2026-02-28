@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnityHub | Connect Generations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #fff; color: #1a1a1a; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .post-hidden { display: none; }
+        .overlay-page { position: fixed; inset: 0; background: white; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); z-index: 100; overflow-y: auto; }
+        .overlay-page.active { transform: translateY(0); }
+        .tab-active { border-bottom: 2px solid #000; font-weight: 800; color: #000; }
+        .insta-post { border-bottom: 1px solid #efefef; margin-bottom: 25px; padding-bottom: 20px; }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); transition: all 0.4s ease; opacity: 0; z-index: 200; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #notifDot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; display: none; border: 2px solid white; }
+        .community-card { background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <div id="toast" class="toast bg-gray-900 text-white px-6 py-3 rounded-full font-bold text-sm shadow-2xl">Action Successful!</div>
+
+    <nav class="sticky top-0 z-40 bg-white border-b border-gray-100 h-14 flex items-center justify-between px-4">
+        <h1 class="text-xl font-extrabold tracking-tighter text-blue-600 italic">UnityHub</h1>
+        <div class="flex items-center space-x-5">
+            <button onclick="openNotifs()" class="relative">
+                <i class="fa-regular fa-heart text-2xl"></i>
+                <span id="notifDot"></span>
+            </button>
+            <button onclick="openPage('messagePage')"><i class="fa-regular fa-paper-plane text-2xl"></i></button>
+        </div>
+    </nav>
+
+    <section class="border-b border-gray-100 p-4 flex space-x-6 overflow-x-auto no-scrollbar">
+        <div class="flex flex-col items-center space-y-1 min-w-[70px]">
+            <label class="relative cursor-pointer">
+                <input type="file" accept="video/*" class="hidden" onchange="showToast('Video ready to upload!')">
+                <div class="w-16 h-16 rounded-full border-2 border-blue-500 p-0.5 flex items-center justify-center">
+                    <div class="w-full h-full bg-gray-100 rounded-full flex items-center justify-center text-blue-600"><i class="fa-solid fa-plus"></i></div>
+                </div>
+            </label>
+            <span class="text-[11px] font-medium text-gray-500">My Story</span>
+        </div>
+        <div class="flex flex-col items-center space-y-1 min-w-[70px]"><div class="w-16 h-16 rounded-full border-2 border-orange-400 p-1"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="rounded-full"></div><span class="text-[11px] text-gray-500">Mentors</span></div>
+        <div class="flex flex-col items-center space-y-1 min-w-[70px]"><div class="w-16 h-16 rounded-full border-2 border-green-500 p-1 flex items-center justify-center text-green-600 font-bold">NG</div><span class="text-[11px] text-gray-500">NGOs</span></div>
+        <div class="flex flex-col items-center space-y-1 min-w-[70px]"><div class="w-16 h-16 rounded-full border-2 border-purple-400 p-1"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sasha" class="rounded-full"></div><span class="text-[11px] text-gray-500">Peers</span></div>
+    </section>
+
+    <div class="flex justify-around border-b border-gray-100 text-[13px] text-gray-400 font-semibold bg-white sticky top-14 z-30">
+        <button onclick="filterPosts('all', this)" class="py-3 px-2 tab-active">All Feed</button>
+        <button onclick="filterPosts('student', this)" class="py-3 px-2">Students & Elderly</button>
+        <button onclick="filterPosts('ngo', this)" class="py-3 px-2">NGO Aid</button>
+        <button onclick="filterPosts('mentor', this)" class="py-3 px-2">Patient Circle</button>
+    </div>
+
+    <main id="mainFeed" class="max-w-screen-md mx-auto px-4 pt-4"></main>
+
+    <div id="profilePage" class="overlay-page">
+        <header class="sticky top-0 bg-white border-b p-4 flex items-center z-50">
+            <button onclick="closePage('profilePage')" class="text-2xl mr-4"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2 id="profHeaderName" class="font-bold text-lg">Profile</h2>
+        </header>
+        <div class="max-w-screen-md mx-auto p-4">
+            <div class="flex items-center justify-between mb-6">
+                <img id="profImg" src="" class="w-20 h-20 rounded-full border shadow-sm">
+                <div class="flex space-x-6 text-center">
+                    <div><p class="font-bold text-lg" id="profFollowers">0</p><p class="text-xs text-gray-500">Followers</p></div>
+                    <div><p class="font-bold text-lg" id="profFollowing">0</p><p class="text-xs text-gray-500">Following</p></div>
+                    <div><p class="font-bold text-lg" id="profVouches">0</p><p class="text-xs text-gray-500">Vouches</p></div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <h3 id="profName" class="font-bold text-xl"></h3>
+                <p id="profField" class="text-blue-600 text-sm font-semibold uppercase tracking-wide"></p>
+                <p id="profBio" class="text-sm mt-2 leading-relaxed text-gray-600"></p>
+            </div>
+            <div class="flex space-x-2 mb-8">
+                <button onclick="handleConnect(currentProfile.name, currentProfile.seed, currentProfile.type)" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg">Connect</button>
+                <button class="flex-1 bg-gray-100 font-bold py-2 rounded-lg text-sm">Vouch</button>
+            </div>
+            <div id="photoGrid" class="grid grid-cols-3 gap-1"></div>
+        </div>
+    </div>
+
+    <div id="communityPage" class="overlay-page">
+        <header class="p-4 border-b flex items-center sticky top-0 bg-white">
+            <button onclick="closePage('communityPage')" class="mr-4 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2 class="font-extrabold text-xl">Communities</h2>
+        </header>
+        <div class="p-4">
+            <div class="community-card flex items-center justify-between">
+                <div class="flex items-center"><div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xl mr-3"><i class="fa-solid fa-brain"></i></div>
+                <div><h4 class="font-bold">Mental Health Peers</h4><p class="text-xs text-gray-500">4.2k Active Members</p></div></div>
+                <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Join</button>
+            </div>
+            <div class="community-card flex items-center justify-between">
+                <div class="flex items-center"><div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-xl mr-3"><i class="fa-solid fa-utensils"></i></div>
+                <div><h4 class="font-bold">Intergenerational Cooking</h4><p class="text-xs text-gray-500">1.8k Active Members</p></div></div>
+                <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Join</button>
+            </div>
+            <div class="community-card flex items-center justify-between">
+                <div class="flex items-center"><div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-xl mr-3"><i class="fa-solid fa-seedling"></i></div>
+                <div><h4 class="font-bold">Urban Gardening NGO</h4><p class="text-xs text-gray-500">950 Active Members</p></div></div>
+                <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="userProfilePage" class="overlay-page">
+        <header class="p-4 border-b flex justify-between items-center sticky top-0 bg-white">
+            <button onclick="closePage('userProfilePage')"><i class="fa-solid fa-arrow-left"></i></button>
+            <span class="font-bold text-lg">your_unity_hub</span>
+            <i class="fa-solid fa-gear text-xl"></i>
+        </header>
+        <div class="p-4">
+            <div class="flex items-center space-x-10 mb-6">
+                <div class="relative"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="w-24 h-24 rounded-full border-4 border-gray-50 shadow-sm"><div class="absolute bottom-1 right-1 bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] border-2 border-white"><i class="fa-solid fa-plus"></i></div></div>
+                <div class="flex flex-1 justify-around text-center">
+                    <div><p class="font-extrabold text-lg">24</p><p class="text-[10px] text-gray-400 font-bold uppercase">Posts</p></div>
+                    <div><p class="font-extrabold text-lg">892</p><p class="text-[10px] text-gray-400 font-bold uppercase">Followers</p></div>
+                    <div><p class="font-extrabold text-lg">310</p><p class="text-[10px] text-gray-400 font-bold uppercase">Following</p></div>
+                </div>
+            </div>
+            <h3 class="font-extrabold">Unity User</h3>
+            <p class="text-sm text-gray-600 mb-6">Bridging the generational gap one connection at a time. Mentorship & Community advocate.</p>
+            <div class="flex space-x-2 mb-8"><button class="flex-1 bg-gray-100 font-bold py-2 rounded-lg text-sm">Edit Profile</button><button class="flex-1 bg-gray-100 font-bold py-2 rounded-lg text-sm">Share Profile</button></div>
+            <div class="grid grid-cols-3 gap-1" id="userPostGrid"></div>
+        </div>
+    </div>
+
+    <div id="notificationPage" class="overlay-page"><header class="p-4 border-b flex items-center sticky top-0 bg-white"><button onclick="closePage('notificationPage')" class="mr-4"><i class="fa-solid fa-arrow-left"></i></button><h2 class="font-bold">Activity</h2></header><div id="notifList"></div></div>
+    <div id="messagePage" class="overlay-page"><header class="p-4 border-b flex items-center sticky top-0 bg-white"><button onclick="closePage('messagePage')" class="mr-4"><i class="fa-solid fa-arrow-left"></i></button><h2 class="font-bold">Messages</h2></header><div id="messageList"></div></div>
+    <div id="searchPage" class="overlay-page"><div class="p-4 flex items-center border-b"><button onclick="closePage('searchPage')" class="mr-4"><i class="fa-solid fa-arrow-left"></i></button><input type="text" placeholder="Search accounts, skills..." class="flex-1 bg-gray-100 rounded-lg p-2 outline-none"></div><div class="p-10 text-center text-gray-400">Search results will appear here</div></div>
+
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-100 h-16 flex items-center justify-around px-4 z-50 shadow-lg">
+        <button onclick="location.reload()"><i class="fa-solid fa-house text-2xl"></i></button>
+        <button onclick="openPage('searchPage')"><i class="fa-solid fa-magnifying-glass text-2xl text-gray-400"></i></button>
+        <div class="bg-cyan-500 w-12 h-10 rounded-xl flex items-center justify-center text-white shadow-md shadow-cyan-100"><i class="fa-solid fa-hand-holding-heart text-xl"></i></div>
+        <button onclick="openPage('communityPage')"><i class="fa-solid fa-users text-2xl text-gray-400"></i></button>
+        <button onclick="openPage('userProfilePage')"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="w-8 h-8 rounded-full border"></button>
+    </div>
+
+    <script>
+        const profiles = [
+            { name: "Arthur P. (Elderly)", type: 'mentor', field: "Navy Veteran", bio: "Retired merchant navy captain. Looking to share stories of the 1960s sea travels with the younger generation.", seed: "Arthur", followers: '1.4k', following: '55', vouches: '18', comments: ["Fascinating stories!", "I'd love a coffee chat.", "Respect to your service."] },
+            { name: "Martha Stewart", type: 'mentor', field: "Culinary Arts", bio: "Expert in French pastry. I believe cooking is the best way to bond across ages. Hosting weekly baking sessions.", seed: "Martha", followers: '4.2k', following: '120', vouches: '310', comments: ["Your croissants changed my life.", "Such a patient teacher!", "The best bake-off!"] },
+            { name: "Dr. Chen", type: 'mentor', field: "Cardiology", bio: "Medical professional offering health workshops for seniors and mentorship for aspiring medical students.", seed: "Chen", followers: '12k', following: '15', vouches: '940', comments: ["Thank you for the advice, Doc.", "Very insightful.", "Life-changing workshop."] },
+            { name: "Liam Johnson", type: 'student', field: "Software Dev", bio: "Building accessible tech for seniors. Currently working on a voice-assisted shopping app.", seed: "Liam", followers: '620', following: '410', vouches: '25', comments: ["Way to go Liam!", "Such an important project.", "Need testers?"] },
+            { name: "Sarah Miller", type: 'student', field: "Nursing", bio: "Final year nursing student. Volunteer at the community hospice. Love chatting with elders about their history.", seed: "Sarah", followers: '1.8k', following: '800', vouches: '140', comments: ["You have a heart of gold.", "Future of medicine is bright.", "Keep it up!"] },
+            { name: "Green Earth NGO", type: 'ngo', field: "Environment", bio: "Local non-profit focused on reforestation and community gardens. Join us for our weekend planting drives.", seed: "Earth", followers: '150k', following: '1k', vouches: '45k', comments: ["I'm coming this Saturday!", "Great initiative.", "Supporting from Seattle."] },
+            { name: "Ocean Rescue", type: 'ngo', field: "Marine Life", bio: "Verified: Protecting coastal ecosystems. We offer student internships and senior volunteer positions.", seed: "Ocean", followers: '92k', following: '150', vouches: '18k', comments: ["Save the reef!", "Incredible work.", "Proud to be a member."] },
+            { name: "Harold Jenkins", type: 'mentor', field: "Astrophysics", bio: "Retired professor. I still look at the stars every night. Happy to teach the basics of stargazing.", seed: "Harold", followers: '2.4k', following: '12', vouches: '62', comments: ["The telescope session was epic!", "Pure magic.", "Clear skies ahead."] },
+            { name: "Aria Gupta", type: 'student', field: "Architecture", bio: "Redesigning retirement homes to be more interactive and vibrant. Looking for feedback from elders.", seed: "Aria", followers: '940', following: '200', vouches: '38', comments: ["We need this!", "Great vision.", "I have some ideas!"] },
+            { name: "Safe Haven NGO", type: 'ngo', field: "Shelter", bio: "Providing safe housing and medical aid for displaced families. Community-driven and volunteer-supported.", seed: "Haven", followers: '300k', following: '2k', vouches: '110k', comments: ["Bless you guys.", "Donated today!", "Work of angels."] },
+            { name: "Evelyn Ross", type: 'mentor', field: "Journalism", bio: "Ex-war correspondent. Teaching ethics of storytelling and interviewing to young students.", seed: "Evelyn", followers: '5.1k', following: '320', vouches: '215', comments: ["Powerful speaker.", "Real insights.", "The Truth matters."] },
+            { name: "Felix Tan", type: 'student', field: "Finance", bio: "Teaching basic digital banking and fraud prevention to seniors. Knowledge is protection!", seed: "Felix", followers: '1.1k', following: '95', vouches: '54', comments: ["Thank you Felix!", "Very useful tips.", "Helped my grandma!"] }
+        ];
+
+        let currentProfile = null;
+
+        function renderFeed() {
+            const feed = document.getElementById('mainFeed');
+            feed.innerHTML = '';
+            profiles.forEach(p => {
+                // Everyone View
+                const post = document.createElement('div');
+                post.className = `insta-post all-item`;
+                post.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center cursor-pointer" onclick="openFullProfile('${p.name}')">
+                            <img src="https://api.dicebear.com/7.x/${p.type==='ngo'?'initials':'avataaars'}/svg?seed=${p.seed}" class="w-10 h-10 rounded-full mr-3 border">
+                            <div><h3 class="font-extrabold text-sm">${p.name}</h3><p class="text-[10px] text-blue-600 font-bold uppercase">${p.field}</p></div>
+                        </div>
+                        <button class="text-gray-400"><i class="fa-solid fa-ellipsis"></i></button>
+                    </div>
+                    <img src="https://picsum.photos/800/800?sig=${Math.random()}" class="w-full rounded-xl mb-4 aspect-square object-cover shadow-sm">
+                    <div class="px-1">
+                        <div class="flex space-x-4 mb-2 text-xl"><i class="fa-regular fa-heart"></i><i class="fa-regular fa-comment"></i><i class="fa-regular fa-paper-plane"></i></div>
+                        <p class="text-sm mb-2"><span class="font-extrabold mr-2">${p.name}</span>${p.bio}</p>
+                        <div class="space-y-1 mt-3 pt-3 border-t border-gray-50">
+                            ${p.comments.map(c => `<p class="text-[13px]"><span class="font-bold mr-2 text-gray-800">User</span>${c}</p>`).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // Directory Card View
+                const card = document.createElement('div');
+                card.className = `border rounded-2xl p-4 mb-4 card-item post-hidden shadow-sm bg-white`;
+                card.setAttribute('data-type', p.type);
+                card.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <img src="https://api.dicebear.com/7.x/${p.type==='ngo'?'initials':'avataaars'}/svg?seed=${p.seed}" class="w-14 h-14 rounded-full mr-4 border-2 border-gray-50">
+                        <div><h3 class="font-extrabold text-lg">${p.name}</h3><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${p.field}</p></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-5 leading-relaxed italic">"${p.bio.substring(0, 80)}..."</p>
+                    <button onclick="openFullProfile('${p.name}')" class="w-full bg-blue-600 text-white font-extrabold py-2.5 rounded-xl text-sm shadow-md shadow-blue-100 transition-transform active:scale-95">View Full Profile</button>
+                `;
+                feed.appendChild(post);
+                feed.appendChild(card);
+            });
+        }
+
+        function filterPosts(type, el) {
+            document.querySelectorAll('.tab-active').forEach(t => t.classList.remove('tab-active'));
+            el.classList.add('tab-active');
+            document.querySelectorAll('.all-item, .card-item').forEach(i => i.classList.add('post-hidden'));
+            if (type === 'all') document.querySelectorAll('.all-item').forEach(i => i.classList.remove('post-hidden'));
+            else document.querySelectorAll(`.card-item[data-type="${type}"]`).forEach(i => i.classList.remove('post-hidden'));
+        }
+
+        function openFullProfile(name) {
+            const p = profiles.find(x => x.name === name);
+            currentProfile = p;
+            document.getElementById('profilePage').classList.add('active');
+            document.getElementById('profName').innerText = p.name;
+            document.getElementById('profField').innerText = p.field;
+            document.getElementById('profBio').innerText = p.bio;
+            document.getElementById('profFollowers').innerText = p.followers;
+            document.getElementById('profFollowing').innerText = p.following;
+            document.getElementById('profVouches').innerText = p.vouches;
+            document.getElementById('profImg').src = `https://api.dicebear.com/7.x/${p.type==='ngo'?'initials':'avataaars'}/svg?seed=${p.seed}`;
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = '';
+            for(let i=0; i<9; i++) grid.innerHTML += `<div class="aspect-square bg-gray-50 overflow-hidden rounded-md"><img src="https://picsum.photos/400/400?sig=${Math.random()}" class="w-full h-full object-cover"></div>`;
+        }
+
+        function handleConnect(name, seed, type) {
+            document.getElementById('notifDot').style.display = 'block';
+            const list = document.getElementById('notifList');
+            const entry = document.createElement('div');
+            entry.className = "p-4 border-b bg-blue-50 text-sm";
+            entry.innerHTML = `You sent a connection request to <strong>${name}</strong>.`;
+            list.prepend(entry);
+
+            setTimeout(() => {
+                const nAccept = document.createElement('div');
+                nAccept.className = "p-4 border-b bg-green-50 flex items-center text-sm";
+                nAccept.innerHTML = `<i class="fa-solid fa-circle-check text-green-600 mr-3"></i><strong>${name}</strong> accepted your request!`;
+                list.prepend(nAccept);
+                addToMessages(name, seed, type);
+                showToast(`${name} Accepted!`);
+            }, 1200);
+            showToast("Request Sent!");
+        }
+
+        function addToMessages(name, seed, type) {
+            const mList = document.getElementById('messageList');
+            const item = document.createElement('div');
+            item.className = "flex items-center p-4 border-b hover:bg-gray-50";
+            item.innerHTML = `<img src="https://api.dicebear.com/7.x/${type==='ngo'?'initials':'avataaars'}/svg?seed=${seed}" class="w-12 h-12 rounded-full mr-3 border"><div><h4 class="font-bold text-sm">${name}</h4><p class="text-xs text-green-500 font-bold">Online</p></div>`;
+            mList.prepend(item);
+        }
+
+        function openNotifs() { document.getElementById('notifDot').style.display = 'none'; openPage('notificationPage'); }
+        function openPage(id) { 
+            document.getElementById(id).classList.add('active'); 
+            if(id === 'userPostGrid') renderUserPosts();
+        }
+        function closePage(id) { document.getElementById(id).classList.remove('active'); }
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+        function renderUserPosts() {
+            const grid = document.getElementById('userPostGrid');
+            grid.innerHTML = '';
+            for(let i=0; i<12; i++) grid.innerHTML += `<div class="aspect-square bg-gray-100 border border-white"><img src="https://picsum.photos/400/400?sig=${i}" class="w-full h-full object-cover"></div>`;
+        }
+
+        renderFeed();
+        renderUserPosts();
+    </script>
+</body>
+</html>

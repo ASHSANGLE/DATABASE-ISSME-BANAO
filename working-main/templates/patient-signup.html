@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoldenSage – Patient Signup</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      /* GoldenSage Theme */
+      --primary: #2f5d50;
+      /* Deep Sage */
+      --primary-light: #3d7a68;
+      /* Light Sage */
+      --accent: #c6a84f;
+      /* Gold */
+      --success: #10b981;
+      --danger: #ef4444;
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --glass-border: 1px solid rgba(47, 93, 80, 0.1);
+      --input-bg: rgba(255, 255, 255, 0.9);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --bg-gradient: linear-gradient(135deg, #f9fdfb 0%, #f0f4f8 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    html,
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      overflow-y: auto !important;
+      padding-top: 70px;
+      /* More space for navbar */
+      scroll-behavior: smooth;
+      color: #1e293b;
+    }
+
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      opacity: 0.15;
+      /* Subtle texture */
+    }
+
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+      z-index: -1;
+      backdrop-filter: blur(5px);
+    }
+
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: var(--glass-border);
+      color: var(--primary);
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 50px;
+      box-shadow: var(--shadow-sm);
+      z-index: 1000;
+      gap: 15px;
+    }
+
+    .navbar img {
+      height: 40px;
+      width: auto;
+      border-radius: 8px;
+    }
+
+    .navbar span {
+      font-size: 24px;
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+    }
+
+    /* Layout */
+    .wrapper {
+      max-width: 1100px;
+      margin: 40px auto;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 40px;
+      padding: 0 20px;
+    }
+
+    .sticky-side {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Cards */
+    .profile-card,
+    .branding-card,
+    .section-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: var(--glass-border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s ease;
+    }
+
+    .section-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: white;
+      border-radius: 12px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+
+    .home-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Profile Upload */
+    .profile-card {
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-card h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary);
+      margin-top: 15px;
+      font-size: 24px;
+    }
+
+    .upload-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .upload-container:hover {
+      transform: scale(1.05);
+    }
+
+    .upload-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .upload-overlay {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background: var(--accent);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Typography inside cards */
+    .section-card h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .section-card h3 i {
+      color: var(--accent);
+    }
+
+    /* Forms */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--input-bg);
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 15px;
+      color: var(--primary);
+      transition: all 0.2s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+      background: white;
+      outline: none;
+    }
+
+    /* Custom Checkbox/Radio */
+    .checkbox-group,
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .checkbox-group label,
+    .radio-group label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 50px;
+      font-size: 14px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-group label:hover,
+    .radio-group label:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .checkbox-group input,
+    .radio-group input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    /* Button */
+    .btn-submit {
+      background: linear-gradient(135deg, var(--primary) 0%, #1e293b 100%);
+      color: white;
+      width: 100%;
+      padding: 18px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 20px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.5);
+    }
+
+    /* Biometric */
+    .scanner-container {
+      border: 2px dashed #cbd5e1;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+
+    .scanner-container:hover {
+      border-color: var(--accent);
+    }
+
+    .thumb-icon {
+      font-size: 50px;
+      color: #94a3b8;
+      transition: color 0.3s;
+    }
+
+    .scanner-container:hover .thumb-icon {
+      color: var(--accent);
+    }
+
+    @media (max-width: 900px) {
+      .wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .sticky-side {
+        position: relative;
+        top: 0;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full-width {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="navbar">
+    <img src="/assets/nl.jpg" alt="Logo">
+    <span>GoldenSage</span>
+  </div>
+
+  <video autoplay muted loop id="bgVideo">
+    <source src="/assets/bg6.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+
+  <div class="wrapper">
+    <aside class="sticky-side">
+      <a href="/main" class="home-btn">
+        <i class="fas fa-home"></i> Home
+      </a>
+
+      <div class="profile-card">
+        <label for="pImgUpload" class="upload-container">
+          <img id="pPreview" src="https://via.placeholder.com/150?text=Patient+Photo" alt="Upload Photo">
+          <div class="upload-overlay"><i class="fas fa-camera"></i></div>
+        </label>
+        <input type="file" id="pImgUpload" style="display:none" onchange="preview(event)">
+        <h2 id="pDisplayName">New Patient</h2>
+        <p style="color:#64748b; font-size: 14px; font-weight: 500;">Patient Identity Setup</p>
+      </div>
+
+      <div class="profile-card" style="padding: 20px; text-align: left; background: rgba(240, 248, 255, 0.9);">
+        <h4 style="color: var(--primary); font-size: 14px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i>
+          Important Note</h4>
+        <p style="font-size: 12px; line-height: 1.6; color: #444;">
+          Ensure all medical details and emergency contacts are verified. This information is critical for real-time
+          monitoring and rapid response protocols.
+        </p>
+      </div>
+
+      <div class="branding-card">
+        <div class="brand-logo"><i class="fas fa-heartbeat"></i></div>
+        <h3 style="font-family:'Playfair Display'; color:var(--primary);">Patient Care</h3>
+        <p class="brand-tagline">Personalized monitoring and safety for your loved ones.</p>
+        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=80"
+          alt="Care" class="brand-img">
+      </div>
+    </aside>
+
+    <form  class="main-content">
+
+      <section class="section-card">
+        <h3><i class="fas fa-user-shield"></i> Guardian Contact (family member)</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Guardian Phone</label>
+            <input type="tel" placeholder="+1 234 567 890" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Guardian Email</label>
+            <input type="email" id="gEmail" name="guardian_email" oninput="valEmail()" placeholder="guardian@email.com"
+              required>
+            <div id="emailWarn" class="warning-text">Valid email required</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <h3><i class="fas fa-id-card"></i> Basic Information</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="required">Patient's Full Name</label>
+            <input type="text" id="pNameInput" name="name" oninput="updateName()" placeholder="Legal Name" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Patient Email</label>
+            <input type="email" name="email" placeholder="patient@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Create Password</label>
+            <input type="password" name="password" placeholder="Set a secure password" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Age</label>
+            <input type="number" placeholder="Years" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Your Phone Number</label>
+            <input type="tel" name="phone" placeholder="Patient contact number" required>
+          </div>
+          <div class="form-group full-width">
+            <label class="required">Gender</label>
+            <div class="radio-group">
+              <label><input type="radio" name="g" required> Female</label>
+              <label><input type="radio" name="g"> Male</label>
+              <label><input type="radio" name="g"> Other</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <h3><i class="fas fa-map-marker-alt"></i> Address Details</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="required">House / Street / Apartment</label>
+            <input type="text" placeholder="Enter full street address" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Area / Locality</label>
+            <input type="text" placeholder="Neighborhood" required>
+          </div>
+          <div class="form-group">
+            <label class="required">City</label>
+            <input type="text" placeholder="City Name" required>
+          </div>
+          <div class="form-group">
+            <label class="required">State</label>
+            <input type="text" placeholder="State/Province" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Country</label>
+            <input type="text" placeholder="Country" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Pincode / ZIP</label>
+            <input type="text" placeholder="6-digit code" required>
+          </div>
+        </div>
+      </section> 
+
+      <section class="section-card">
+        <h3><i class="fas fa-notes-medical"></i> Clinical Background</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Blood Group</label>
+            <select required>
+              <option value="">Choose...</option>
+              <option>A+</option>
+              <option>B+</option>
+              <option>O+</option>
+              <option>AB+</option>
+              <option>A-</option>
+              <option>B-</option>
+              <option>O-</option>
+              <option>AB-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Primary Condition</label>
+            <input type="text" placeholder="Main diagnosis">
+          </div>
+          <div class="form-group full-width">
+            <label>Allergies & Sensitivities</label>
+            <textarea placeholder="List all allergies..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <h3><i class="fas fa-brain"></i> Memory Disorders</h3>
+        <div class="form-group">
+          <label class="required">Specific Conditions (Select all that apply)</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox"> Alzheimer's</label>
+            <label><input type="checkbox"> Dementia</label>
+            <label><input type="checkbox"> Amnesia</label>
+            <label><input type="checkbox"> Parkinson's</label>
+            <label><input type="checkbox"> Cognitive Impairment</label>
+            <label><input type="checkbox"> None / Other</label>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="required">Condition Details</label>
+          <textarea placeholder="Describe the severity and history of the condition..." required></textarea>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <h3><i class="fas fa-bell"></i> Care Reminders</h3>
+        <div id="reminderList"></div>
+        <div class="add-reminder" onclick="addNewReminder()">+ Add Medication or Routine Reminder</div>
+      </section>
+
+      <section class="section-card">
+        <h3><i class="fas fa-ambulance"></i> Emergency Protocols</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Primary Physician ( Doctor's name)</label>
+            <input type="text" placeholder="Dr. Name" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Doctor's Phone Number</label>
+            <input type="tel" placeholder="Phone number" required>
+          </div>
+          <div class="form-group">
+            <label class="required">Emergency Hotline </label>
+            <input type="tel" placeholder="Primary emergency number" required>
+          </div>
+          <div class="form-group">
+            <label>Neighbor's Phone Number</label>
+            <input type="tel" placeholder="Secondary contact (optional)">
+          </div>
+          <div class="form-group full-width">
+            <label>Preferred Hospital</label>
+            <input type="text" placeholder="Nearest preferred facility">
+          </div>
+        </div>
+      </section>
+
+      <button type="submit" class="btn-submit">Complete Patient Signup</button>
+    </form>
+  </div>
+
+  <script>
+    function preview(e) {
+      const reader = new FileReader();
+      reader.onload = () => document.getElementById('pPreview').src = reader.result;
+      reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function updateName() {
+      const val = document.getElementById('pNameInput').value;
+      document.getElementById('pDisplayName').innerText = val ? val : "New Patient";
+    }
+
+    function valEmail() {
+      const email = document.getElementById('gEmail');
+      const warn = document.getElementById('emailWarn');
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      warn.style.display = (email.value && !regex.test(email.value)) ? "block" : "none";
+    }
+
+    let reminderIdx = 0;
+    function addNewReminder() {
+      reminderIdx++;
+      const div = document.createElement("div");
+      div.className = "reminder-item";
+      div.innerHTML = `<span>${reminderIdx}.</span><input placeholder="e.g. Morning Insulin - 8:00 AM" required>`;
+      document.getElementById("reminderList").appendChild(div);
+    }
+
+    function triggerScanner() {
+      const line = document.getElementById("scanLine");
+      line.style.display = "block";
+      line.style.animation = "scanning 1.5s infinite linear";
+      setTimeout(() => {
+        line.style.display = "none";
+        alert("Patient biometric data captured and encrypted.");
+      }, 3000);
+    }
+  </script>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Your config (add YOUR keys here) -->
+<script src="supabase-config.js"></script>
+
+<!-- Signup logic (all form fields mapped) -->
+<script src="signup.js"></script>
+
+<!-- Keep your existing UI scripts below -->
+<script> 
+  // preview(), updateName(), addNewReminder(), triggerScanner() stay here
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoldenSage – How It Works</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:#fff;
+  color:#222;
+}
+
+/* ===== HERO ===== */
+.hero{
+  text-align:center;
+  padding:140px 20px 120px;
+  background:#fff;
+  position:relative;
+  z-index:5;
+}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:56px;
+  color:#003366;
+  margin-bottom:10px;
+}
+.hero p{
+  font-family:'Playfair Display',serif;
+  font-size:22px;
+  color:#666;
+}
+
+/* ===== PARALLAX SECTION ===== */
+.parallax-section{
+  position:relative;
+  min-height:100vh;
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed; /* image stays fixed */
+  display:flex;
+  align-items:center;
+}
+
+/* ===== OVERLAY PANEL ===== */
+.content-panel{
+  background:rgba(224, 240, 255, 0.95); /* light blue */
+  max-width:560px;
+  padding:80px 70px;
+  margin:120px;
+}
+
+/* LEFT / RIGHT CONTROL */
+.left .content-panel{
+  margin-left:120px;
+}
+.right{
+  justify-content:flex-end;
+}
+.right .content-panel{
+  margin-right:120px;
+}
+
+/* ===== TEXT ===== */
+.step-number{
+  font-family:'Playfair Display',serif;
+  font-size:48px;
+  color:#003366;
+  opacity:.25;
+  margin-bottom:14px;
+}
+
+.content-panel h2{
+  font-family:'Playfair Display',serif;
+  font-size:34px;
+  color:#003366;
+  margin-bottom:22px;
+}
+
+.content-panel p{
+  font-size:15px;
+  line-height:1.9;
+  color:#555;
+  margin-bottom:32px;
+}
+
+.content-panel a{
+  display:inline-block;
+  background:#000;
+  color:#fff;
+  padding:14px 34px;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:500;
+}
+
+/* ===== FOOTER ===== */
+footer{
+  background:#fff;
+  border-top:1px solid #eee;
+  text-align:center;
+  padding:60px 0;
+  font-size:12px;
+  letter-spacing:1px;
+  color:#999;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:900px){
+  .parallax-section{
+    background-attachment:scroll;
+  }
+  .content-panel{
+    margin:40px 24px;
+    padding:60px 30px;
+  }
+  .left .content-panel,
+  .right .content-panel{
+    margin:40px 24px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>How It Works?</h1>
+  <p>Your journey to smarter care begins here.</p>
+</section>
+
+<!-- STEP 01 -->
+<section class="parallax-section left" style="background-image:url('../assets/images/gs1.png')">
+  <div class="content-panel">
+    <div class="step-number">01.</div>
+    <h2>register yourself</h2>
+    <p>
+     Create your or your loved one's account in GoldenSage. Get every small medical details of your patient, your doctor's consultations and many more. User freindly for non tech people. 
+    </p>
+   
+  </div>
+</section>
+
+<!-- STEP 02 -->
+<section class="parallax-section right" style="background-image:url('../assets/images/gs2.png')">
+  <div class="content-panel">
+    <div class="step-number">02.</div>
+    <h2>AI Enabled Voice companion</h2>
+    <p>
+      All we need is youe voice. Get your reminders, daily routine , medicine intake prompts from your companion automatically. Interact with him to play cognitive games,
+</p>
+  </div>
+</section>
+
+<!-- STEP 03 -->
+<section class="parallax-section left" style="background-image:url('../assets/images/gs3.png')">
+  <div class="content-panel">
+    <div class="step-number">03.</div>
+    <h2>SOS Alerts</h2>
+    <p>
+      We give you instad sos alerts and gps tracking for you patients , with memory conditions, because memory can fade but care shouldn't.
+    </p>
+  </div>
+</section>
+
+<!-- STEP 04 -->
+<section class="parallax-section right" style="background-image:url('../assets/images/gs4.png')">
+  <div class="content-panel">
+    <div class="step-number">04.</div>
+    <h2>Review & Feedback</h2>
+    <p>
+      Access your dashboard, with all your medicals records, evrything.
+</p>
+  </div>
+</section>
+
+<footer>
+  2025 © GoldenSage | ALL RIGHTS RESERVED
+</footer>
+
+</body>
+</html>

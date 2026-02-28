@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Reminder - Senior Care</title>
+    <link rel="stylesheet" href="medication-reminder.css">
+</head>
+<body>
+    <!-- Visible Alarm Banner -->
+    <div id="alarmBanner" class="alarm-banner hidden">
+        <div class="alarm-content">
+            <div class="alarm-icon">🔔</div>
+            <div class="alarm-text">
+                <h2 class="alarm-title">⏰ MEDICATION REMINDER</h2>
+                <p class="alarm-message" id="alarmMessage"></p>
+            </div>
+            <div class="alarm-actions">
+                <button class="alarm-dismiss-btn" onclick="dismissAlarm()">✓ I've Taken It</button>
+                <button class="alarm-snooze-btn" onclick="snoozeAlarm()">⏰ Remind Me in 5 Min</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header class="main-header">
+            <h1>💊 Medication Reminder</h1>
+            <p class="subtitle">Your daily medication schedule</p>
+        </header>
+
+        <!-- Patient Information -->
+        <div class="info-card">
+            <label for="patientName" class="large-label">👤 Patient Name</label>
+            <input type="text" id="patientName" class="large-input" placeholder="Enter your name here">
+        </div>
+
+        <!-- Current Time Display -->
+        <div class="time-display">
+            <div class="current-time" id="currentTime"></div>
+            <div class="current-date" id="currentDate"></div>
+        </div>
+
+        <!-- Medication Sections -->
+        <div class="medication-sections">
+            <!-- Morning Section -->
+            <div class="med-section morning-section">
+                <div class="section-header">
+                    <h2>🌅 Morning Medications</h2>
+                    <button class="add-btn" onclick="addMedication('morning')" aria-label="Add morning medication">
+                        ➕ Add Medication
+                    </button>
+                </div>
+                <div class="med-list" id="morningList"></div>
+            </div>
+
+            <!-- Afternoon Section -->
+            <div class="med-section afternoon-section">
+                <div class="section-header">
+                    <h2>☀️ Afternoon Medications</h2>
+                    <button class="add-btn" onclick="addMedication('afternoon')" aria-label="Add afternoon medication">
+                        ➕ Add Medication
+                    </button>
+                </div>
+                <div class="med-list" id="afternoonList"></div>
+            </div>
+
+            <!-- Evening Section -->
+            <div class="med-section evening-section">
+                <div class="section-header">
+                    <h2>🌙 Evening Medications</h2>
+                    <button class="add-btn" onclick="addMedication('evening')" aria-label="Add evening medication">
+                        ➕ Add Medication
+                    </button>
+                </div>
+                <div class="med-list" id="eveningList"></div>
+            </div>
+
+            <!-- Bedtime Section -->
+            <div class="med-section bedtime-section">
+                <div class="section-header">
+                    <h2>🌛 Bedtime Medications</h2>
+                    <button class="add-btn" onclick="addMedication('bedtime')" aria-label="Add bedtime medication">
+                        ➕ Add Medication
+                    </button>
+                </div>
+                <div class="med-list" id="bedtimeList"></div>
+            </div>
+        </div>
+
+        <!-- Save Confirmation Message -->
+        <div id="saveConfirmation" class="save-confirmation hidden">
+            <div class="confirmation-content">
+                <span class="confirmation-icon">✅</span>
+                <span class="confirmation-text">Medication schedule saved successfully!</span>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Message -->
+        <div id="deleteConfirmation" class="delete-confirmation hidden">
+            <div class="confirmation-content">
+                <span class="confirmation-icon">🗑️</span>
+                <span class="confirmation-text">Medication removed successfully!</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="saveAllData()" aria-label="Save all medication information">
+                💾 Save All Medications
+            </button>
+            <button class="btn btn-secondary" onclick="resetDailyCheckmarks()" aria-label="Reset all checkmarks for new day">
+                🔄 Reset for New Day
+            </button>
+            <button class="btn btn-info" onclick="testReminder()" aria-label="Test reminder notification">
+                🔔 Test Reminder
+            </button>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="summary-card">
+            <h3>📊 Today's Summary</h3>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalMeds">0</span>
+                    <span class="stat-label">Total Medications</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="takenMeds">0</span>
+                    <span class="stat-label">Taken Today</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="pendingMeds">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions-card">
+            <h3>📋 How to Use</h3>
+            <ul class="instructions-list">
+                <li>Enter your name at the top</li>
+                <li>Click "Add Medication" for each time period</li>
+                <li>Set the time and enter medication details</li>
+                <li>Check the box when you take your medication</li>
+                <li>Click "Save" to save your schedule</li>
+                <li>You will receive reminders at the scheduled times</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Time Picker Modal -->
+    <div id="timePickerModal" class="time-picker-modal hidden">
+        <div class="time-picker-overlay" onclick="closeTimePicker()"></div>
+        <div class="time-picker-container">
+            <div class="time-picker-header">
+                <h3>⏰ Select Time</h3>
+                <button class="time-picker-close" onclick="closeTimePicker()">✕</button>
+            </div>
+            <div class="time-picker-content">
+                <!-- Large Time Display -->
+                <div class="time-display-wrapper">
+                    <div class="time-display-large" id="timeDisplayLarge">08:00</div>
+                    <div class="time-display-12h" id="timeDisplay12h">8:00 AM</div>
+                </div>
+                
+                <!-- Quick Preset Buttons -->
+                <div class="time-presets-section">
+                    <label class="presets-label">Quick Select:</label>
+                    <div class="time-presets">
+                        <button class="time-preset-btn" onclick="setPresetTime('06:00')">
+                            <span class="preset-time">6:00</span>
+                            <span class="preset-period">AM</span>
+                        </button>
+                        <button class="time-preset-btn" onclick="setPresetTime('08:00')">
+                            <span class="preset-time">8:00</span>
+                            <span class="preset-period">AM</span>
+                        </button>
+                        <button class="time-preset-btn" onclick="setPresetTime('12:00')">
+                            <span class="preset-time">12:00</span>
+                            <span class="preset-period">PM</span>
+                        </button>
+                        <button class="time-preset-btn" onclick="setPresetTime('14:00')">
+                            <span class="preset-time">2:00</span>
+                            <span class="preset-period">PM</span>
+                        </button>
+                        <button class="time-preset-btn" onclick="setPresetTime('18:00')">
+                            <span class="preset-time">6:00</span>
+                            <span class="preset-period">PM</span>
+                        </button>
+                        <button class="time-preset-btn" onclick="setPresetTime('20:00')">
+                            <span class="preset-time">8:00</span>
+                            <span class="preset-period">PM</span>
+                        </button>
+                        <button class="time-preset-btn" onclick="setPresetTime('22:00')">
+                            <span class="preset-time">10:00</span>
+                            <span class="preset-period">PM</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Time Selectors -->
+                <div class="time-selectors-wrapper">
+                    <!-- Hour Selection -->
+                    <div class="time-selector-section">
+                        <label class="time-selector-label">Hour</label>
+                        <div class="time-selector-controls">
+                            <button class="time-btn time-btn-up" onclick="adjustTime('hour', 1)" aria-label="Increase hour">
+                                <span class="btn-icon">▲</span>
+                            </button>
+                            <div class="time-value-display">
+                                <span class="time-value" id="hourValue">08</span>
+                            </div>
+                            <button class="time-btn time-btn-down" onclick="adjustTime('hour', -1)" aria-label="Decrease hour">
+                                <span class="btn-icon">▼</span>
+                            </button>
+                        </div>
+                        <div class="time-quick-adjust">
+                            <button class="quick-adjust-btn" onclick="adjustTime('hour', -1)">-1</button>
+                            <button class="quick-adjust-btn" onclick="adjustTime('hour', 1)">+1</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Separator -->
+                    <div class="time-separator">:</div>
+                    
+                    <!-- Minute Selection -->
+                    <div class="time-selector-section">
+                        <label class="time-selector-label">Minute</label>
+                        <div class="time-selector-controls">
+                            <button class="time-btn time-btn-up" onclick="adjustTime('minute', 1)" aria-label="Increase 1 minute">
+                                <span class="btn-icon">▲</span>
+                            </button>
+                            <div class="time-value-display">
+                                <span class="time-value" id="minuteValue">00</span>
+                            </div>
+                            <button class="time-btn time-btn-down" onclick="adjustTime('minute', -1)" aria-label="Decrease 1 minute">
+                                <span class="btn-icon">▼</span>
+                            </button>
+                        </div>
+                        <div class="time-quick-adjust">
+                            <button class="quick-adjust-btn" onclick="adjustTime('minute', -5)">-5</button>
+                            <button class="quick-adjust-btn" onclick="adjustTime('minute', 5)">+5</button>
+                            <button class="quick-adjust-btn" onclick="adjustTime('minute', -15)">-15</button>
+                            <button class="quick-adjust-btn" onclick="adjustTime('minute', 15)">+15</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="time-picker-actions">
+                    <button class="time-picker-btn time-picker-cancel" onclick="closeTimePicker()">✕ Cancel</button>
+                    <button class="time-picker-btn time-picker-confirm" onclick="confirmTimeSelection()">✓ Confirm Time</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="medication-reminder.js"></script>
+</body>
+</html>
+

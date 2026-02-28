@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnityHub | Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+            /* BACKGROUND IMAGE APPLIED DIRECTLY TO BODY */
+            background: linear-gradient(rgba(10, 14, 20, 0.45),
+                    rgba(10, 14, 20, 0.55)),
+                url('../assets/images/background-uc.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #0a0e14;
+            /* Fallback color */
+        }
+
+        /* Delete the .bg-overlay class from your CSS entirely */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 24px;
+            padding: 50px;
+            width: 850px;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 40px;
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.15);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: white;
+            outline: none;
+            width: 100%;
+        }
+
+        .btn-cyan-outline {
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            background: transparent;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-cyan-active {
+            background: rgba(0, 210, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .tab-btn {
+            font-size: 18px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            color: white;
+            border-bottom: 2px solid #00d2ff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-overlay">
+    </div>
+
+    <header class="navbar">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center"><i
+                    class="fa-solid fa-infinity"></i></div>
+            <h1 class="text-2xl font-bold italic">UnityHub</h1>
+        </div>
+        <div class="flex gap-8">
+            <a href="/main">
+                <div class="text-center text-gray-400 text-xs cursor-pointer hover:text-white"><i
+                        class="fa-solid fa-house block text-xl mb-1">Home</i></div>
+            </a>
+        </div>
+    </header>
+
+    <div class="flex items-center justify-center" style="height: calc(100vh - 100px);">
+        <div class="glass-card">
+
+            <div class="flex flex-col justify-center gap-6">
+                <div class="flex gap-6 mb-4">
+                    <button id="loginTab" onclick="showAuth('login')" class="tab-btn active">Log In</button>
+                    <button id="signupTab" onclick="showAuth('signup')" class="tab-btn">Sign Up</button>
+                </div>
+
+                <div id="labels">
+                    <div class="mb-8 text-gray-300">Email / Username</div>
+                    <div class="text-gray-300">Password</div>
+                </div>
+
+                <div id="signupLabels" class="hidden flex flex-col gap-8 text-gray-300">
+                    <div>Full Name</div>
+                    <div>Username</div>
+                    <div id="ageLabel">Age & Gender</div>
+                    <div id="purposeLabel" class="hidden">Purpose of Organization</div>
+                    <div>Email Address</div>
+                    <div>Password</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <div id="typeToggle" class="hidden flex justify-end gap-2 mb-2">
+                    <button id="indBtn" onclick="setAccountType('individual')"
+                        class="btn-cyan-outline btn-cyan-active">Individual</button>
+                    <button id="ngoBtn" onclick="setAccountType('ngo')" class="btn-cyan-outline">NGO / Org</button>
+                </div>
+
+                <div id="loginInputs" class="flex flex-col gap-4 mt-12">
+                    <form action="/login/unity" method="POST" class="flex flex-col gap-4">
+                        <input type="email" name="email" placeholder="Enter your email" class="input-field" required>
+                        <input type="password" name="password" placeholder="Enter your password" class="input-field"
+                            required>
+                        <button type="submit"
+                            class="bg-blue-600 py-3 rounded-lg font-bold mt-4 shadow-lg shadow-blue-900/40">Enter
+                            UnityHub</button>
+                    </form>
+                </div>
+
+                <div id="signupInputs" class="hidden flex flex-col gap-4">
+                    <form action="/signup/unity" method="POST" class="flex flex-col gap-4">
+                        <input type="hidden" name="role" id="roleInput" value="individual">
+                        <input type="text" name="name" id="nameInp" placeholder="Full Name" class="input-field"
+                            required>
+                        <!-- Username removed for simplicity or mapped to email/name -->
+
+                        <div id="indRow" class="flex gap-2">
+                            <input type="number" name="age" placeholder="Age" class="input-field w-1/3">
+                            <select name="gender" class="input-field w-2/3 bg-slate-800">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div id="ngoRow" class="hidden flex flex-col gap-4">
+                            <input type="tel" name="phone" placeholder="Leader's Mobile Number" class="input-field">
+                            <input type="text" name="purpose" placeholder="Purpose of joining (e.g., Elder Support)"
+                                class="input-field">
+                        </div>
+
+                        <input type="email" name="email" placeholder="Email@example.com" class="input-field" required>
+                        <input type="password" name="password" placeholder="Create Password" class="input-field"
+                            required>
+
+                        <button type="submit"
+                            class="bg-blue-600 py-3 rounded-lg font-bold mt-2 shadow-lg shadow-blue-900/40">Create
+                            Account</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function showAuth(mode) {
+            const isLogin = mode === 'login';
+            document.getElementById('loginTab').classList.toggle('active', isLogin);
+            document.getElementById('signupTab').classList.toggle('active', !isLogin);
+            document.getElementById('loginInputs').classList.toggle('hidden', !isLogin);
+            document.getElementById('labels').classList.toggle('hidden', !isLogin);
+            document.getElementById('signupInputs').classList.toggle('hidden', isLogin);
+            document.getElementById('signupLabels').classList.toggle('hidden', isLogin);
+            document.getElementById('typeToggle').classList.toggle('hidden', isLogin);
+        }
+
+        function setAccountType(type) {
+            const isInd = type === 'individual';
+            document.getElementById('indBtn').classList.toggle('btn-cyan-active', isInd);
+            document.getElementById('ngoBtn').classList.toggle('btn-cyan-active', !isInd);
+            document.getElementById('indRow').classList.toggle('hidden', !isInd);
+            document.getElementById('ngoRow').classList.toggle('hidden', isInd);
+
+            // Toggle Purpose Label
+            document.getElementById('purposeLabel').classList.toggle('hidden', isInd);
+
+            document.getElementById('ageLabel').innerText = isInd ? "Age & Gender" : "Leader Contact";
+            document.getElementById('nameInp').placeholder = isInd ? "Full Name" : "Organization Name";
+
+            // Set hidden role input
+            document.getElementById('roleInput').value = type;
+        }
+    </script>
+</body>
+
+</html>

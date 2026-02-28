@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>One Tap SOS</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .sos-btn {
+            background: red;
+            color: white;
+            font-size: 30px;
+            padding: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Emergency SOS</h1>
+
+    <button class="sos-btn" onclick="sendSOS()">
+        🚨 SOS
+    </button>
+
+    <p id="status"></p>
+
+    <script>
+        function sendSOS() {
+            fetch("/feature/sos/trigger", {
+                method: "POST"
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("SOS SENT! Caregiver notified.");
+                window.location.href = "/feature/sos/dashboard";
+            });
+        }
+    </script>
+
+</body>
+</html>

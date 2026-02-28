@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldenSage | Guardian Executive</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            /* GoldenSage Theme */
+            --primary: #2f5d50;
+            --accent: #c6a84f;
+            --bg-body: #f9fdfb;
+            --sidebar-bg: #222d32;
+            --nav-height: 70px;
+            --success: #10B981;
+            --danger: #E11D48;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-body);
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* --- NAVIGATION --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1001;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-home-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .nav-home-btn:hover {
+            opacity: 0.9;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            padding-top: 40px 24px;
+            margin-top: var(--nav-height);
+            height: calc(100vh - var(--nav-height));
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 20px;
+            text-decoration: none;
+            color: #9CA3AF;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .nav-link.active {
+            background: #374151;
+            color: white;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            margin-top: var(--nav-height);
+        }
+
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        /* --- HOME PAGE --- */
+        .hero-banner {
+            background-color: var(--primary);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 40px;
+            margin-bottom: 40px;
+        }
+
+        .nav-card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .nav-card {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .nav-card i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .session-section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .session-container {
+            background: white;
+            border-radius: 32px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .session-container::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 30px;
+            bottom: 30px;
+            width: 5px;
+            border-radius: 0 5px 5px 0;
+            background: var(--primary);
+        }
+
+        .session-item {
+            background: #F8FAFC;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        /* --- MODAL LAYOUTS --- */
+        .detail-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 24, 39, 0.8);
+            z-index: 3000;
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .detail-card {
+            background: white;
+            width: 620px;
+            border-radius: 32px;
+            padding: 40px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .info-strip {
+            background: #F0FDF4;
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .point-tag {
+            background: #f1f5f9;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .problem-box {
+            background: #FFF1F2;
+            color: #BE123C;
+            border: 1px solid #FFE4E6;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Styling for the high-fidelity Session Overview */
+        .recap-container {
+            background: #F0FDF4;
+            border-left: 5px solid #10B981;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        /* Red Problem Banner */
+        .problem-banner {
+            background: #FFF1F2;
+            color: #BE123C;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            margin-bottom: 25px;
+        }
+
+        /* Discussion Capsule Points */
+        .discussion-capsule {
+            background: #F1F5F9;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #334155;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .discussion-capsule i {
+            color: #64748B;
+            font-size: 0.8rem;
+        }
+
+        .recap-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #111827;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .problem-alert {
+            background: #FFF1F2;
+            color: #BE123C;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .discussion-point {
+            background: #F1F5F9;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .discussion-point i {
+            color: #64748B;
+            font-size: 0.8rem;
+        }
+
+        .close-records-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            background: #1E3A8A;
+            /* dark blue */
+            color: #FFFFFF;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .close-records-btn:hover {
+            background: #1D4ED8;
+            /* slightly lighter blue on hover */
+        }
+
+
+        /* --- CALENDAR FEATURE STYLES --- */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .cal-day {
+            border: 1px solid #E2E8F0;
+            padding: 12px 5px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            background: white;
+        }
+
+        .cal-day.active {
+            background: #5A4033;
+            color: white;
+            border-color: #5A4033;
+        }
+
+        .cal-day span {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .cal-day strong {
+            font-size: 1.1rem;
+        }
+
+        .time-slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .time-slot {
+            padding: 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary);
+        }
+
+        .time-slot.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .time-slot.disabled {
+            opacity: 0.4;
+            background: #F8FAFC;
+            cursor: not-allowed;
+            border-color: #E2E8F0;
+        }
+
+        .calendar-alert {
+            background: #FFF9E6;
+            border: 1px solid #FFE4A3;
+            padding: 12px 15px;
+            border-radius: 12px;
+            color: #856404;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        /* --- DAILY UPDATES --- */
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .vital-card {
+            background: white;
+            padding: 24px;
+            border-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #EDF2F7;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .updates-card {
+            background: white;
+            border-radius: 32px;
+            padding: 30px;
+        }
+
+        .adh-bar {
+            height: 8px;
+            background: #F1F5F9;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .adh-fill {
+            height: 100%;
+            background: #5a4033;
+            border-radius: 10px;
+        }
+
+        .med-row,
+        .routine-row {
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .completed {
+            background: #F0FDF4;
+            border: 1px solid #DCFCE7;
+            color: #15803D;
+        }
+
+        .pending {
+            background: #F8FAFC;
+            border: 1px solid #EDF2F7;
+        }
+
+        /* --- CONSULTATION SPECIFIC --- */
+
+
+
+        .book-btn:hover {
+            background: #4a6950;
+        }
+
+        .doctor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .doc-card {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            border: 1px solid #E2E8F0;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .specialty-tag {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: #F1F5F9;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .doc-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .doc-img {
+            width: 50px;
+            height: 50px;
+            background: #F0FDF4;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .book-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .filter-pill {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 50px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .active-pill {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-settings {
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        .setting-item {
+            margin: 15px 0;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="detail-overlay" id="calendarModal">
+        <div class="detail-card" style="width: 450px; padding: 30px; border-radius: 24px;">
+
+
+            <div
+                style="background: #FFF9E6; border-radius: 12px; padding: 15px; margin-bottom: 25px; display: flex; gap: 10px; border: 1px solid #FFE4A3;">
+                <i class="fa-solid fa-circle-info" style="color: #856404; margin-top: 3px;"></i>
+                <span style="color: #856404; font-size: 0.85rem; font-weight: 500;">These dates are the only ones the
+                    doctor is available.</span>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
+                <i class="fa-solid fa-chevron-left" onclick="changeMonth(-1)" style="cursor:pointer; padding: 5px;"></i>
+                <strong id="calendarMonth">December 2025</strong>
+                <i class="fa-solid fa-chevron-right" onclick="changeMonth(1)" style="cursor:pointer; padding: 5px;"></i>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 10px;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">S</div>
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">M</div>
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">T</div>
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">W</div>
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">T</div>
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">F</div>
+                <div style="font-size: 0.7rem; font-weight: 700; color: #9CA3AF;">S</div>
+            </div>
+
+            <div id="monthlyGrid"
+                style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 30px; text-align: center;">
+            </div>
+
+            <h4 style="margin: 0 0 15px 0; font-size: 0.95rem; font-weight: 700;">Available Times</h4>
+            <div class="time-slot-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="time-slot" onclick="selectTime(this)"
+                    style="border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                    10:00 AM</div>
+                <div class="time-slot" onclick="selectTime(this)"
+                    style="border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                    11:30 AM</div>
+                <div class="time-slot" onclick="selectTime(this)"
+                    style="border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                    02:30 PM</div>
+                <div class="time-slot" onclick="selectTime(this)"
+                    style="border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                    05:00 PM</div>
+            </div>
+
+            <button onclick="confirmBooking()"
+                style="width:100%; background:#5A7F61; color:white; border:none; padding:16px; border-radius:12px; font-weight:700; margin-top:30px; cursor:pointer; font-size: 1rem;">Confirm
+                Appointment</button>
+            <button class="close-records-btn" onclick="closeCalendar()">Close Records</button>
+        </div>
+    </div>
+    <div class="detail-overlay" id="sessionDetailModal">
+        <div class="detail-card" style="width: 650px; padding: 40px;">
+            <button onclick="closeDetails()"
+                style="position:absolute; right:30px; top:30px; border:none; background:#F1F5F9; width:40px; height:40px; border-radius:50%; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <span
+                style="color:#10B981; font-weight:800; text-transform:uppercase; font-size:0.75rem; letter-spacing:1.5px;">Medical
+                Records x GoldenSage</span>
+            <h2 id="modalTitle" style="margin:10px 0 30px 0; font-size: 2rem; font-weight:800; color:#111827;">
+                Comprehensive Session Overview</h2>
+
+            <div class="recap-box">
+                <div
+                    style="font-weight:800; color:#111827; margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span id="modalRecapTitle">Last Session Recap</span>
+                </div>
+                <p id="modalRecapText" style="margin:0; font-size:1rem; line-height:1.6; color:#374151;"></p>
+            </div>
+
+            <h4 style="margin-bottom:12px; font-size:1.1rem; font-weight:800; color:#111827;">Current Reported Problem
+            </h4>
+            <div class="problem-banner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="modalProblemText"></span>
+            </div>
+
+            <h4 id="pointsHeader" style="margin-bottom:15px; font-size:1.1rem; font-weight:800; color:#111827;">Points
+                to Discuss</h4>
+            <div id="modalPointsContainer"></div>
+
+            <button onclick="closeDetails()"
+                style="width:100%; background:#111827; color:white; border:none; padding:20px; border-radius:18px; font-weight:700; margin-top:35px; cursor:pointer; font-size:1.1rem;">Close
+                Records</button>
+        </div>
+    </div>
+
+    <div class="navbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <!-- LOGO will go here (next step) -->
+            <img src="/assets/nl.jpg" alt="" class="nav-logo">
+            <a class="nav-brand">GoldenSage</a>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="navbar-right">
+            <a href="/main"><i class="fa-solid fa-house">Home </i></a>
+        </div>
+    </div>
+
+
+    <aside class="sidebar">
+        <div style="padding: 0 20px 20px 20px;">
+            <label
+                style="color:#64748B; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:5px; display:block;">Select
+                Patient</label>
+            <select id="patientSelect" onchange="loadPatientData(this.value)"
+                style="width:100%; padding:10px; border-radius:10px; border:1px solid #374151; background:#1F2937; color:white;">
+                {% for patient in patients %}
+                <option value="{{ patient._id }}">{{ patient.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="nav-link" onclick="switchTab('home-view', this)"><i class="fa-solid fa-house"></i> Home</div>
+
+        <div class="nav-link" onclick="switchTab('daily-updates-view', this)"><i class="fa-solid fa-chart-line"></i>
+            Daily Updates</div>
+        <div class="nav-link" onclick="switchTab('consultation-view', this)"><i class="fa-solid fa-calendar-plus"></i>
+            Consultations</div>
+        <div class="nav-link" onclick="switchTab('patient-profile', this)"><i class="fa-solid fa-user-gear"></i> Patient
+            Profile</div>
+        <div class="nav-link" onclick="switchTab('preferences-view', this)"><i class="fa-solid fa-sliders"></i>
+            Preferences</div>
+
+        <div class="nav-link" onclick="window.location.href='/voice-assistant'">
+            <i class="fa-solid fa-microphone"></i> Voice Assistant
+        </div>
+        <div class="nav-link" onclick="openUnityHub()"><i class="fa-solid fa-link"></i> Unity Hub</div>
+        <div class="sidebar-settings">
+
+            <div class="nav-link" onclick="openSettings()">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </div>
+            <div class="nav-link" onclick="handleLogout()" style="color: #F87171;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </div>
+        </div>
+        </div>
+    </aside>
+
+    <main class="main-wrapper">
+        <div id="home-view" class="view-content active">
+
+            <div class="hero-banner">
+                <h1 style="font-size:3rem; margin:0 0 20px 0;">Welcome back, Sarah</h1>
+                <p>System status: All health parameters for John are within normal range.</p>
+            </div>
+
+            <div class="nav-card-grid">
+                <div class="nav-card" onclick="switchTab('daily-updates-view')"><i class="fa-solid fa-stethoscope"></i>
+                    <h3>Vitals & Routine</h3>
+                    <p>Track health logs and daily activities.</p>
+                </div>
+                <div class="nav-card" onclick="switchTab('consultation-view')"><i class="fa-solid fa-calendar-plus"></i>
+                    <h3>Consultations</h3>
+                    <p>Book medical sessions.</p>
+                </div>
+                <div class="nav-card" onclick="switchTab('patient-profile')"><i class="fa-solid fa-user-shield"></i>
+                    <h3>Identity & Health</h3>
+                    <p>Manage medical records.</p>
+                </div>
+            </div>
+
+            <div class="session-section-grid">
+                <div class="session-container">
+                    <h3>Upcoming Sessions</h3>
+                    <div class="session-item" onclick="openUpcoming('Physiotherapy', 'Elizabeth Sterling')">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div
+                                style="width:50px; height:50px; background:white; border-radius:15px; display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                                <i class="fa-solid fa-video"></i>
+                            </div>
+                            <div><strong>Physiotherapy Checkup</strong><br><small>Tomorrow at 10:00 AM</small></div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#CBD5E1"></i>
+                    </div>
+                    <div class="session-item" onclick="openUpcoming('Wellness', 'Marcus Vane')">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div
+                                style="width:50px; height:50px; background:white; border-radius:15px; display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                                <i class="fa-solid fa-stethoscope"></i>
+                            </div>
+                            <div><strong>Wellness Assessment</strong><br><small>Dec 28 at 04:30 PM</small></div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#CBD5E1"></i>
+                    </div>
+                </div>
+
+                <div class="session-container" style="--primary: var(--success);">
+                    <h3>Session History</h3>
+                    <div class="session-item" onclick="openHistory('Cardiology', 'Sarah Chen')">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div
+                                style="width:50px; height:50px; background:white; border-radius:15px; display:flex; align-items:center; justify-content:center; color:var(--success);">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div><strong>Consult with Dr. Elizabeth Sterling</strong><br><small>Yesterday</small></div>
+                        </div>
+                        <span
+                            style="background:#DCFCE7; color:#15803D; padding:5px 12px; border-radius:8px; font-size:0.7rem; font-weight:800;">LOGGED</span>
+                    </div>
+                    <div class="session-item" onclick="openHistory('Dietary', 'Jonathan Hyde')">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div
+                                style="width:50px; height:50px; background:white; border-radius:15px; display:flex; align-items:center; justify-content:center; color:var(--success);">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div><strong>Dietary Sync</strong><br><small>Monday at 09:00 AM</small></div>
+                        </div>
+                        <span
+                            style="background:#DCFCE7; color:#15803D; padding:5px 12px; border-radius:8px; font-size:0.7rem; font-weight:800;">LOGGED</span>
+                    </div>
+                    <div class="session-item" onclick="openHistory('Wellness', 'Marcus Vane')">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div
+                                style="width:50px; height:50px; background:white; border-radius:15px; display:flex; align-items:center; justify-content:center; color:var(--success);">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div><strong>Wellness Review</strong><br><small>Last Thursday</small></div>
+                        </div>
+                        <span
+                            style="background:#DCFCE7; color:#15803D; padding:5px 12px; border-radius:8px; font-size:0.7rem; font-weight:800;">LOGGED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="daily-updates-view" class="view-content">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
+                <div><span
+                        style="color:var(--text-muted); font-size:0.8rem; font-weight:600; text-transform:uppercase;">Real-time
+                        Monitoring</span>
+                    <h2 style="margin:5px 0 0 0; font-size:1.8rem;">Daily Updates</h2>
+                </div>
+                <button
+                    style="background:var(--danger); color:white; border:none; padding:12px 24px; border-radius:14px; font-weight:800; cursor:pointer;">SEND
+                    SOS ALERT</button>
+            </div>
+
+            <div class="vitals-grid" id="vitalsContainer">
+                <!-- Vitals injected by JS -->
+                <div style="grid-column: span 3; text-align: center; color: #64748B;">Loading vitals...</div>
+            </div>
+
+            <div class="details-grid">
+                <div class="updates-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
+                    <h3 style="margin-top:0;">Daily Lifestyle Adherence</h3>
+                    <div style="margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:8px;">
+                            <span>Yoga & Meditation +Excercice</span><span>80%</span>
+                        </div>
+                        <div class="adh-bar">
+                            <div class="adh-fill" style="width:80%"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:8px;">
+                            <span>Sleep cycle</span><span>95%</span>
+                        </div>
+                        <div class="adh-bar">
+                            <div class="adh-fill" style="width:95%"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:8px;">
+                            <span>Daily routine followed</span><span>90%</span>
+                        </div>
+                        <div class="adh-bar">
+                            <div class="adh-fill" style="width:90%"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:8px;">
+                            <span>Interaction with me</span><span>50%</span>
+                        </div>
+                        <div class="adh-bar">
+                            <div class="adh-fill" style="width:50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="updates-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
+                    <h3 style="margin-top:0;">Medication Intake</h3>
+                    <div id="medsContainer">
+                        <div style="text-align: center; color: #64748B;">Loading medications...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="updates-card"
+                style="margin-top:25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
+                <h3 style="margin-top:0;">Daily Routine & Task Tracker</h3>
+                <div id="tasksContainer">
+                    <div style="text-align: center; color: #64748B;">Loading tasks...</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="consultation-view" class="view-content">
+
+            <div style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <span
+                            style="color: var(--primary); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Healthcare
+                            Access</span>
+                        <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800; color: #111827;">Book a
+                            Consultation</h2>
+                    </div>
+                    <div style="position: relative; width: 300px;">
+                        <i class="fa-solid fa-magnifying-glass"
+                            style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+                        <input type="text" placeholder="Search specialist..."
+                            style="width: 100%; padding: 12px 12px 12px 45px; border-radius: 15px; border: 1px solid #E2E8F0; font-family: inherit; outline: none; transition: 0.3s;"
+                            onfocus="this.style.borderColor='var(--primary)'">
+                    </div>
+                </div>
+
+                <div
+                    style="background: linear-gradient(135deg, #5A7F61 0%, #3d5a44 100%); padding: 25px; border-radius: 30px; color: white; display: flex; align-items: center; gap: 20px; margin-bottom: 30px; box-shadow: 0 20px 25px -5px rgba(90, 127, 97, 0.2);">
+                    <div
+                        style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.1rem;">Instant Matching</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">Not sure who to see? Our system
+                            recommends **Dr. Sarah Chen** based on John's recent heart rate logs.</p>
+                    </div>
+                    <button
+                        style="margin-left: auto; background: white; color: var(--primary); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;">Try
+                        Smart Book</button>
+                </div>
+
+                <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px;">
+                    <div class="filter-pill active-pill">All Specialists</div>
+                    <div class="filter-pill">❤️ Cardiology</div>
+                    <div class="filter-pill">🍎 Nutrition</div>
+                    <div class="filter-pill">🚶 Physiotherapy</div>
+                </div>
+            </div>
+
+            <div class="doctor-grid">
+                <div class="doc-card">
+                    <span class="specialty-tag">Cardiology</span>
+                    <div class="doc-info">
+                        <div class="doc-img"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <div><strong>Dr. Sarah Chen</strong><br><small>15+ Years Experience</small></div>
+                    </div>
+                    <p style="font-size:0.85rem; color:#64748B;">Geriatric heart care and blood pressure management.</p>
+                    <button class="book-btn" onclick="openCalendar()">Schedule Session</button>
+                </div>
+
+                <div class="doc-card">
+                    <span class="specialty-tag">Nutrition</span>
+                    <div class="doc-info">
+                        <div class="doc-img"><i class="fa-solid fa-apple-whole"></i></div>
+                        <div><strong>Dr. Jonathan Hyde</strong><br><small>Geriatric Specialist</small></div>
+                    </div>
+                    <p style="font-size:0.85rem; color:#64748B;">Expert in elderly metabolic health and nutrition plans.
+                    </p>
+                    <button class="book-btn" onclick="openCalendar()">Schedule Session</button>
+                </div>
+
+                <div class="doc-card">
+                    <span class="specialty-tag">Physiotherapy</span>
+                    <div class="doc-info">
+                        <div class="doc-img"><i class="fa-solid fa-person-walking"></i></div>
+                        <div><strong>Dr. Elizabeth Sterling</strong><br><small>Mobility Expert</small></div>
+                    </div>
+                    <p style="font-size:0.85rem; color:#64748B;">Specialized in post-stroke recovery and rehabilitation.
+                    </p>
+                    <button class="book-btn" onclick="openCalendar()">Schedule Session</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="patient-profile" class="view-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <div>
+                    <span
+                        style="color:var(--primary); font-size:0.8rem; font-weight:800; text-transform:uppercase;">Identity
+                        & Medical Background</span>
+                    <h2 style="margin:5px 0 0 0; font-size:2.2rem; font-weight:800;">Patient Profile</h2>
+                </div>
+                <button
+                    style="background:white; border:1px solid #E2E8F0; padding:12px 20px; border-radius:12px; font-weight:700; cursor:pointer;"
+                    onclick="printMedicalReport()">
+                    <i class="fa-solid fa-print"></i> Print Medical Report
+                </button>
+            </div>
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 30px;">
+                <div
+                    style="background:white; border-radius:32px; padding:30px; border:1px solid #E2E8F0; text-align:center;">
+                    <div
+                        style="width:120px; height:120px; background:#F1F5F9; border-radius:40px; margin: 0 auto 20px auto; display:flex; align-items:center; justify-content:center; font-size:3rem; color:var(--primary);">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <h3 style="margin:0;">John Willoughby</h3>
+                    <p style="color:#64748B; font-size:0.9rem; margin:5px 0 20px 0;">Patient ID: #GS-88210</p>
+
+                    <div style="text-align:left; background:#F8FAFC; border-radius:20px; padding:20px;">
+                        <div style="margin-bottom:15px;"><small
+                                style="color:#94A3B8; font-weight:700; display:block;">AGE</small><strong>72
+                                Years</strong></div>
+                        <div style="margin-bottom:15px;"><small
+                                style="color:#94A3B8; font-weight:700; display:block;">BLOOD TYPE</small><strong
+                                style="color:#BE123C;">O+ Positive</strong></div>
+                        <div style="margin-bottom:0;"><small
+                                style="color:#94A3B8; font-weight:700; display:block;">HEIGHT /
+                                WEIGHT</small><strong>178cm / 82kg</strong></div>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:30px;">
+                    <div style="background:white; border-radius:32px; padding:30px; border:1px solid #E2E8F0;">
+                        <h3 style="margin-top:0;"><i class="fa-solid fa-clipboard-list"
+                                style="color:var(--primary); margin-right:10px;"></i> Medical Conditions</h3>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <span
+                                style="background:#FFF1F2; color:#BE123C; padding:8px 16px; border-radius:10px; font-size:0.85rem; font-weight:700;">Hypertension</span>
+                            <span
+                                style="background:#FFF1F2; color:#BE123C; padding:8px 16px; border-radius:10px; font-size:0.85rem; font-weight:700;">Type
+                                2 Diabetes</span>
+                            <span
+                                style="background:#F0FDF4; color:#15803D; padding:8px 16px; border-radius:10px; font-size:0.85rem; font-weight:700;">Stable
+                                Osteoarthritis</span>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                        <div style="background:white; border-radius:32px; padding:30px; border:1px solid #E2E8F0;">
+                            <h4 style="margin-top:0; color:#64748B;">Primary Caregiver</h4>
+                            <p style="margin:5px 0; font-weight:700;">Sarah Willoughby (Daughter)</p>
+                            <p style="margin:0; font-size:0.9rem; color:var(--primary); font-weight:600;"><i
+                                    class="fa-solid fa-phone"></i> +1 (555) 0123-456</p>
+                        </div>
+                        <div style="background:white; border-radius:32px; padding:30px; border:1px solid #E2E8F0;">
+                            <h4 style="margin-top:0; color:#64748B;">Preferred Hospital</h4>
+                            <p style="margin:5px 0; font-weight:700;">Saint Jude Medical Center</p>
+                            <p style="margin:0; font-size:0.9rem; color:var(--primary); font-weight:600;"><i
+                                    class="fa-solid fa-location-dot"></i> Emergency Wing B</p>
+                        </div>
+                    </div>
+
+                    <div
+                        style="background:#111827; color:white; border-radius:32px; padding:30px; display:flex; align-items:center; gap:25px;">
+                        <div
+                            style="background:#E11D48; width:50px; height:50px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin:0; color:#FCA5A5;">Critical Allergy Warning</h3>
+                            <p style="margin:5px 0 0 0; opacity:0.8;">Severely allergic to <strong>Penicillin</strong>
+                                and <strong>Shellfish</strong>. Avoid contact in all medical procedures.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="preferences-view" class="view-content">
+            <div style="margin-bottom:30px;">
+                <span
+                    style="color:var(--primary); font-size:0.8rem; font-weight:800; text-transform:uppercase;">Customization</span>
+                <h2 style="margin:5px 0 0 0; font-size:2.2rem; font-weight:800;">System Preferences</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div class="updates-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
+                    <h3><i class="fa-solid fa-comment-dots"></i> Voice Companion</h3>
+                    <p style="font-size:0.9rem; color:#64748B;">Change the language and persona of the patient's AI
+                        assistant.</p>
+                    <select
+                        style="width:100%; padding:12px; border-radius:12px; border:1px solid #E2E8F0; margin-top:10px;">
+                        <option>English (Default)</option>
+                        <option>Spanish (Español)</option>
+                        <option>French (Français)</option>
+                        <option>Hindi (हिन्दी)</option>
+                    </select>
+                    <button class="book-btn" style="margin-top:20px;">Update Companion</button>
+                </div>
+
+                <div class="updates-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
+                    <h3><i class="fa-solid fa-file-medical"></i> Medical Reports</h3>
+                    <p style="font-size:0.9rem; color:#64748B;">Upload new diagnostics or sync with hospital databases.
+                    </p>
+                    <div
+                        style="border: 2px dashed #E2E8F0; padding: 20px; text-align: center; border-radius: 15px; margin-top: 10px;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: #CBD5E1;"></i>
+                        <p style="font-size: 0.8rem; margin: 10px 0;">Drag & drop PDF reports here</p>
+                    </div>
+                    <button class="book-btn" style="background:#111827; margin-top:20px;">Sync Health Cloud</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-overlay" id="settingsModal">
+            <div class="detail-card" style="width:400px;">
+                <h3>Settings</h3>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" onchange="toggleDimMode(this)">
+                        Dim the light
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" onchange="toggleLargeText(this)">
+                        Large text
+                    </label>
+                </div>
+
+                <button class="close-records-btn" onclick="closeSettings()">Close</button>
+            </div>
+        </div>
+
+
+
+    </main>
+    <script>
+        // --- DATA LOADING LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateMonthlyCalendar();
+            switchTab('home-view');
+
+            // Load initial patient data
+            const select = document.getElementById('patientSelect');
+            if (select && select.value) {
+                loadPatientData(select.value);
+            }
+        });
+
+        function loadPatientData(patientId) {
+            fetch(`/api/guardian/dashboard-data/${patientId}`)
+                .then(res => {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/login/guardian';
+                        return;
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data || data.error) {
+                        console.error("Error fetching data:", data ? data.error : "Unknown");
+                        return;
+                    }
+                    renderVitals(data.vitals);
+                    renderMeds(data.medications);
+                    renderTasks(data.tasks);
+                    // updatePatientProfile(data.patient); // if we had this endpoint
+                })
+                .catch(err => console.error("Error loading patient data:", err));
+        }
+
+        function renderVitals(vitals) {
+            const container = document.getElementById('vitalsContainer');
+            if (!vitals || vitals.length === 0) {
+                container.innerHTML = '<div style="grid-column:span 3; text-align:center; padding:20px;">No vitals recorded today.</div>';
+                return;
+            }
+
+            container.innerHTML = vitals.map(v => `
+                <div class="vital-card">
+                    <div>
+                        <span style="font-size:0.75rem; font-weight:700; color:#6C757D;">${v.type.toUpperCase()}</span>
+                        <div style="font-size:2rem; font-weight:800;">${v.value} <small style="font-size:0.9rem; color:#6C757D;">${v.unit}</small></div>
+                        <span style="color:#10B981; font-size:0.75rem; font-weight:700;">● Latest</span>
+                    </div>
+                    <i class="fa-solid fa-heart-pulse" style="color:var(--primary); font-size:1.5rem;"></i>
+                </div>
+            `).join('');
+        }
+
+        function renderMeds(meds) {
+            const container = document.getElementById('medsContainer');
+            if (!meds || meds.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:10px;">No medications listed.</div>';
+                return;
+            }
+            container.innerHTML = meds.map((m, i) => `
+                <div class="med-row ${i % 2 === 0 ? 'completed' : 'pending'}">
+                    <div><i class="fa-${i % 2 === 0 ? 'solid fa-circle-check' : 'regular fa-circle'}"></i> <strong>${m.name}</strong></div>
+                    <span>${m.time_of_day}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderTasks(tasks) {
+            const container = document.getElementById('tasksContainer');
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:10px;">No tasks tracked today.</div>';
+                return;
+            }
+
+            container.innerHTML = tasks.map(t => `
+                <div class="routine-row ${t.is_completed ? 'completed' : 'pending'}">
+                    <div><i class="fa-${t.is_completed ? 'solid fa-circle-check' : 'regular fa-circle'}"></i> <strong>${t.title}</strong></div>
+                    <span>${t.description}</span>
+                    <span style="background:${t.is_completed ? '#DCFCE7' : '#E2E8F0'}; color:${t.is_completed ? '#15803D' : '#475569'}; padding:4px 10px; border-radius:6px; font-size:0.7rem; font-weight:800;">
+                        ${t.is_completed ? 'DONE' : 'PENDING'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // --- BOOKING LOGIC ---
+        let selectedTimeSlot = null;
+        let selectedDoctor = "Dr. Sarah Chen"; // Default for demo
+
+        function selectTime(el) {
+            document.querySelectorAll('.time-slot').forEach(s => {
+                s.style.background = "transparent";
+                s.style.color = "#111827";
+            });
+            el.style.background = "#5A7F61";
+            el.style.color = "white";
+            selectedTimeSlot = el.innerText;
+        }
+
+        function confirmBooking() {
+            if (!selectedTimeSlot) {
+                alert("Please select a time slot.");
+                return;
+            }
+
+            const patientId = document.getElementById('patientSelect').value;
+            // formatted date for demo
+            const dateStr = currentViewDate.toISOString().split('T')[0];
+
+            fetch('/api/appointment/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    patient_id: patientId,
+                    doctor_name: selectedDoctor,
+                    specialty: "General",
+                    date: dateStr,
+                    time: selectedTimeSlot
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert("Success! Appointment booked for " + dateStr + " at " + selectedTimeSlot);
+                        closeCalendar();
+                    } else {
+                        alert("Error booking: " + data.error);
+                    }
+                })
+                .catch(err => alert("Network error"));
+        }
+
+        // --- TAB SWITCHING LOGIC ---
+        function switchTab(id, el) {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+
+            const targetView = document.getElementById(id);
+            if (targetView) targetView.classList.add('active');
+
+            if (el) {
+                el.classList.add('active');
+            } else {
+                const sidebarLinks = document.querySelectorAll('.sidebar .nav-link');
+                sidebarLinks.forEach(link => {
+                    if (link.innerText.toLowerCase().includes(id.split('-')[0])) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // --- CALENDAR LOGIC ---
+        let currentViewDate = new Date();
+
+        function openCalendar() {
+            document.getElementById('calendarModal').style.display = 'flex';
+            generateMonthlyCalendar();
+        }
+
+        function closeCalendar() {
+            document.getElementById('calendarModal').style.display = 'none';
+        }
+
+        function changeMonth(step) {
+            currentViewDate.setMonth(currentViewDate.getMonth() + step);
+            generateMonthlyCalendar();
+        }
+
+        function generateMonthlyCalendar() {
+            const grid = document.getElementById('monthlyGrid');
+            const monthHeader = document.getElementById('calendarMonth');
+            grid.innerHTML = '';
+
+            const month = currentViewDate.getMonth();
+            const year = currentViewDate.getFullYear();
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+
+            monthHeader.innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                const dateObj = new Date(year, month, day);
+                const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+
+                dayDiv.innerText = day;
+                dayDiv.style.cssText = "width:35px; height:35px; display:flex; align-items:center; justify-content:center; margin:auto; cursor:pointer; border-radius:50%; font-size:0.9rem;";
+
+                if (isWeekend) dayDiv.style.color = "#94A3B8";
+
+                dayDiv.onclick = function () {
+                    document.querySelectorAll('#monthlyGrid div').forEach(d => {
+                        d.style.background = "transparent";
+                        // Only restore gray if it was a weekend
+                        const dDate = new Date(year, month, parseInt(d.innerText));
+                        const dIsWeekend = (dDate.getDay() === 0 || dDate.getDay() === 6);
+                        d.style.color = dIsWeekend ? "#94A3B8" : "#111827";
+                    });
+
+                    this.style.background = "#5A7F61";
+                    this.style.color = "white";
+
+                    if (isWeekend) {
+                        document.querySelector('.time-slot-grid').innerHTML =
+                            '<p style="grid-column: span 2; font-size: 0.85rem; color: #E11D48; font-weight: 600; text-align: center; padding: 10px;">Not available on weekends.</p>';
+                    } else {
+                        updateTimeSlots(dateObj.getDay());
+                    }
+                };
+                grid.appendChild(dayDiv);
+            }
+        }
+
+        function updateTimeSlots(dayOfWeek) {
+            const timeContainer = document.querySelector('.time-slot-grid');
+            let times = [];
+
+            switch (dayOfWeek) {
+                case 1: times = ['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM']; break;
+                case 2: times = ['08:30 AM', '10:30 AM', '01:30 PM', '03:30 PM']; break;
+                case 3: times = ['10:00 AM', '12:00 PM', '02:30 PM', '05:00 PM']; break;
+                case 4: times = ['09:30 AM', '11:30 AM', '01:00 PM', '04:30 PM']; break;
+                case 5: times = ['08:00 AM', '10:00 AM', '12:00 PM', '02:00 PM']; break;
+                default: times = [];
+            }
+
+            timeContainer.innerHTML = '';
+            times.forEach(t => {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.style.cssText = "border: 1px solid #E2E8F0; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.85rem;";
+                slot.innerText = t;
+
+                slot.onclick = function () {
+                    selectTime(this);
+                };
+                timeContainer.appendChild(slot);
+            });
+        }
+
+        // --- EMERGENCY CHECKER ---
+        setInterval(function () {
+            fetch('/check-emergency')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.emergency_detected) {
+                        alert("🚨 EMERGENCY DETECTED! Check your notifications immediately.");
+                    }
+                })
+                .catch(e => { }); // silent fail
+        }, 10000);
+
+        // --- OTHER UTILS ---
+        function openUnityHub() {
+            window.location.href = "/connection";
+        }
+
+        function handleLogout() {
+            if (confirm("Are you sure you want to log out?")) {
+                window.location.href = "/login";
+            }
+        }
+
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function toggleDimMode(el) {
+            document.body.style.background = el.checked ? '#111827' : '';
+        }
+
+        function toggleLargeText(el) {
+            document.body.style.fontSize = el.checked ? '18px' : '';
+        }
+
+        /*===================================== medical report ================================*/
+        function printMedicalReport() {
+            // (Keeping the original print function as it was)
+            const patientName = "John Willoughby";
+            const patientID = "#GS-88210";
+            const dob = "May 12, 1952";
+            const bloodType = "O+ Positive";
+            const allergies = "Penicillin, Shellfish, High Sulfa content";
+            const medication = "Donepezil (5mg), Lisinopril (10mg)";
+
+            const printWindow = window.open('', '_blank', 'height=800,width=600');
+
+            printWindow.document.write(`
+        <html>
+            <head>
+                <title>Medical Report - ${patientName}</title>
+                <style>
+                    body { font-family: 'Arial', sans-serif; padding: 40px; color: #333; }
+                    .header { text-align: center; border-bottom: 2px solid #5A7F61; padding-bottom: 20px; }
+                    .logo { font-weight: bold; font-size: 24px; color: #5A7F61; }
+                    .report-title { text-transform: uppercase; margin-top: 10px; letter-spacing: 2px; }
+                    .section { margin-top: 30px; }
+                    .section-title { background: #F3F4F6; padding: 8px; font-weight: bold; border-left: 4px solid #5A7F61; }
+                    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+                    .label { font-weight: bold; color: #666; }
+                    .footer { margin-top: 50px; font-size: 10px; text-align: center; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+                    @media print { .no-print { display: none; } }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="logo">GOLDENSAGE CARE</div>
+                    <div class="report-title">Official Patient Medical Profile</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">PATIENT INFORMATION</div>
+                    <div class="grid">
+                        <div><span class="label">Name:</span> ${patientName}</div>
+                        <div><span class="label">Patient ID:</span> ${patientID}</div>
+                        <div><span class="label">Date of Birth:</span> ${dob}</div>
+                        <div><span class="label">Blood Type:</span> ${bloodType}</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">CRITICAL ALERTS & ALLERGIES</div>
+                    <p style="color: red; font-weight: bold;">${allergies}</p>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">CURRENT MEDICATIONS</div>
+                    <p>${medication}</p>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">EMERGENCY CONTACT</div>
+                    <p>Sarah Willoughby (Guardian) <br> Phone: +1 (555) 0123-456</p>
+                </div>
+
+                <div class="footer">
+                    Generated via GoldenSage Guardian Executive Dashboard on ${new Date().toLocaleString()}<br>
+                    This document is intended for medical professionals only.
+                </div>
+            </body>
+        </html>
+    `);
+
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>
