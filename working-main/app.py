@@ -9,8 +9,12 @@ from flask_pymongo import PyMongo
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from bson.objectid import ObjectId
 from datetime import datetime
+from copy import deepcopy
 from modals import User, create_guardian, create_patient, create_notification, create_unity_user, create_appointment
 from twilio.rest import Client
+
+user_games = {}
+
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +22,10 @@ CORS(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or "a_very_secret_key"
 app.config['MONGO_URI'] = os.getenv('MONGO_URI') or "mongodb://localhost:27017/seniorcare"
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['SESSION_COOKIE_SECURE'] = False  # Set True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['REMEMBER_COOKIE_DURATION'] = 60 * 60 * 24 * 30  # 30 days
 
 # Gemini AI for Voice Assistant
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
@@ -112,8 +120,8 @@ def signup_guardian():
             # Login
             user_data = mongo.db.guardians.find_one({'_id': result.inserted_id})
             user = User(user_data, 'guardian')
-            login_user(user)
-            
+            login_user(user, remember=True)
+
             return redirect('/guardian-dashboard')
             
         return render_template('create-user.html')
@@ -133,7 +141,7 @@ def login():
             
             if user_data and check_password_hash(user_data['password'], password):
                 user = User(user_data, 'guardian')
-                login_user(user)
+                login_user(user, remember=True)
                 return redirect('/guardian-dashboard')
                 
             return "Invalid credentials", 401
@@ -191,7 +199,7 @@ def patient_login():
             
             if user_data and check_password_hash(user_data['password'], password):
                 user = User(user_data, 'patient')
-                login_user(user)
+                login_user(user, remember=True)
                 return redirect('/patient-dashboard')
                 
             return "Invalid credentials", 401
@@ -206,12 +214,34 @@ def patient_login():
 @login_required
 def dashboard():
     try:
-        if current_user.role != 'guardian':
+        role = getattr(current_user, 'role', None)
+        if role == 'patient':
             return redirect('/patient-dashboard')
+        if role != 'guardian':
+            return redirect(url_for('login_redirect'))
             
-        # Fetch patients link to this guardian
-        # Important: current_user.id is a string (because of User class), MongoDB stores guardian_id as string if we did it right in create_patient
-        patients = list(mongo.db.patients.find({'guardian_id': current_user.id}))
+        # Fetch patients linked to this guardian (support both ObjectId and string guardian_id)
+        try:
+            guardian_oid = ObjectId(current_user.id)
+            patients = list(mongo.db.patients.find({'guardian_id': guardian_oid}))
+        except Exception:
+            patients = list(mongo.db.patients.find({'guardian_id': current_user.id}))
+
+        # If no patients linked, link the demo patient "Grandpa" to this guardian so medical reports work
+        if not patients:
+            grandpa = mongo.db.patients.find_one({'email': 'grandpa@patient.com'})
+            if grandpa:
+                try:
+                    mongo.db.patients.update_one(
+                        {'_id': grandpa['_id']},
+                        {'$set': {'guardian_id': ObjectId(current_user.id)}}
+                    )
+                    patients = list(mongo.db.patients.find({'guardian_id': ObjectId(current_user.id)}))
+                except Exception:
+                    patients = list(mongo.db.patients.find({'guardian_id': current_user.id}))
+
+        for p in patients:
+            p['id_str'] = str(p['_id'])  # same format as patient dashboard /api/reports
         return render_template('guardian-dashboard.html', patients=patients)
     except Exception as e:
         return f"Dashboard error: {str(e)}", 500
@@ -220,8 +250,11 @@ def dashboard():
 @login_required
 def patient_dashboard():
     try:
-        if current_user.role != 'patient':
+        role = getattr(current_user, 'role', None)
+        if role == 'guardian':
             return redirect('/guardian-dashboard')
+        if role != 'patient':
+            return redirect(url_for('login_redirect'))
             
         # We can pass the patient object, though the template might not use it yet
         return render_template('patient-dashboard.html', patient=current_user)
@@ -285,8 +318,25 @@ def check_emergency():
              # Find any patient of this guardian with is_emergency=True
             emergency = mongo.db.patients.find_one({'guardian_id': current_user.id, 'is_emergency': True})
             if emergency:
-                return jsonify({"emergency_detected": True, "patient_name": emergency['name']})
+                return jsonify({
+                    "emergency_detected": True, 
+                    "patient_name": emergency['name'],
+                    "patient_id": str(emergency['_id'])
+                })
         return jsonify({"emergency_detected": False})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/clear-emergency/<patient_id>', methods=['POST'])
+@login_required
+def clear_emergency(patient_id):
+    try:
+        if current_user.role != 'guardian':
+            return jsonify({"error": "Unauthorized"}), 403
+            
+        mongo.db.patients.update_one({'_id': ObjectId(patient_id), 'guardian_id': current_user.id}, {'$set': {'is_emergency': False}})
+        mongo.db.sos_alerts.update_many({'patient_id': patient_id, 'status': 'active'}, {'$set': {'status': 'resolved'}})
+        return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -347,6 +397,7 @@ def get_patient_dashboard_data():
     patient_id = current_user.id
     
     # Fetch all related data
+    patient = mongo.db.patients.find_one({'_id': ObjectId(patient_id)})
     vitals = list(mongo.db.vitals.find({'patient_id': patient_id}).sort('timestamp', -1).limit(4))
     tasks = list(mongo.db.tasks.find({'patient_id': patient_id, 'date': datetime.utcnow().strftime('%Y-%m-%d')}))
     medications = list(mongo.db.medications.find({'patient_id': patient_id}))
@@ -356,11 +407,14 @@ def get_patient_dashboard_data():
     for item in vitals + tasks + medications + appointments:
         item['_id'] = str(item['_id'])
         
+    medical_records = patient.get('medical_records') if patient else None
+
     return jsonify({
         "vitals": vitals,
         "tasks": tasks,
         "medications": medications,
-        "appointments": appointments
+        "appointments": appointments,
+        "medical_records": medical_records
     })
 
 @app.route('/api/guardian/dashboard-data/<patient_id>')
@@ -370,6 +424,10 @@ def get_guardian_patient_data(patient_id):
         return jsonify({"error": "Unauthorized"}), 403
 
     # Fetch data for specific patient
+    patient = mongo.db.patients.find_one({'_id': ObjectId(patient_id)})
+    if not patient:
+         return jsonify({"error": "Patient not found"}), 404
+
     vitals = list(mongo.db.vitals.find({'patient_id': patient_id}).sort('timestamp', -1).limit(5))
     tasks = list(mongo.db.tasks.find({'patient_id': patient_id, 'date': datetime.utcnow().strftime('%Y-%m-%d')}))
     medications = list(mongo.db.medications.find({'patient_id': patient_id}))
@@ -378,11 +436,14 @@ def get_guardian_patient_data(patient_id):
     for item in vitals + tasks + medications + appointments:
         item['_id'] = str(item['_id'])
 
+    medical_records = patient.get('medical_records')
+
     return jsonify({
         "vitals": vitals,
         "tasks": tasks,
         "medications": medications,
-        "appointments": appointments
+        "appointments": appointments,
+        "medical_records": medical_records
     })
 
 @app.route('/api/task/toggle/<task_id>', methods=['POST'])
@@ -450,8 +511,8 @@ def signup_unity():
         # Auto login
         user_data = mongo.db.unity_users.find_one({'_id': result.inserted_id})
         user = User(user_data, 'unity')
-        login_user(user)
-        
+        login_user(user, remember=True)
+
         return redirect('/connection')
 
     except Exception as e:
@@ -468,7 +529,7 @@ def login_unity():
         
         if user_data and check_password_hash(user_data['password'], password):
             user = User(user_data, 'unity')
-            login_user(user)
+            login_user(user, remember=True)
             return redirect('/connection')
             
         return "Invalid credentials", 401
@@ -553,9 +614,6 @@ def api_patient_dashboard():
 def api_toggle_task():
     """Toggle task completion status"""
     try:
-        if current_user.role != 'patient':
-            return jsonify({"error": "Unauthorized"}), 403
-        
         data = request.json
         task_id = data.get('task_id')
         is_completed = data.get('is_completed', False)
@@ -563,10 +621,24 @@ def api_toggle_task():
         if not task_id:
             return jsonify({"error": "Task ID required"}), 400
         
-        result = mongo.db.tasks.update_one(
-            {'_id': ObjectId(task_id), 'patient_id': current_user.id},
-            {'$set': {'is_completed': is_completed}}
-        )
+        # Verify ownership based on role
+        if current_user.role == 'patient':
+            query = {'_id': ObjectId(task_id), 'patient_id': current_user.id}
+        elif current_user.role == 'guardian':
+            # Check the task exists and belongs to a patient of this guardian
+            task = mongo.db.tasks.find_one({'_id': ObjectId(task_id)})
+            if not task:
+                return jsonify({"error": "Task not found"}), 404
+            
+            patient = mongo.db.patients.find_one({'_id': ObjectId(task.get('patient_id')), 'guardian_id': current_user.id})
+            if not patient:
+                return jsonify({"error": "Unauthorized to modify this task"}), 403
+                
+            query = {'_id': ObjectId(task_id)}
+        else:
+            return jsonify({"error": "Unauthorized"}), 403
+            
+        result = mongo.db.tasks.update_one(query, {'$set': {'is_completed': is_completed}})
         
         if result.matched_count == 0:
             return jsonify({"error": "Task not found"}), 404
@@ -585,19 +657,32 @@ def api_toggle_task():
 def api_add_task():
     """Add new task for patient"""
     try:
-        if current_user.role != 'patient':
-            return jsonify({"error": "Unauthorized"}), 403
-        
         data = request.json
         title = data.get('title')
         description = data.get('description', '')
         
         if not title:
             return jsonify({"error": "Title required"}), 400
+            
+        target_patient_id = None
+        
+        if current_user.role == 'patient':
+            target_patient_id = current_user.id
+        elif current_user.role == 'guardian':
+            target_patient_id = data.get('patient_id')
+            if not target_patient_id:
+                return jsonify({"error": "Patient ID required for guardian"}), 400
+                
+            # Verify the patient belongs to this guardian
+            patient = mongo.db.patients.find_one({'_id': ObjectId(target_patient_id), 'guardian_id': current_user.id})
+            if not patient:
+                return jsonify({"error": "Unauthorized to add task for this patient"}), 403
+        else:
+            return jsonify({"error": "Unauthorized"}), 403
         
         from datetime import datetime as dt
         task = {
-            'patient_id': current_user.id,
+            'patient_id': target_patient_id,
             'title': title,
             'description': description,
             'date': dt.utcnow().strftime('%Y-%m-%d'),
@@ -622,16 +707,29 @@ def api_add_task():
 @login_required
 def sos_trigger():
     try:
+        if not current_user:
+            print("❌ SOS TRIGGER: User not authenticated")
+            return jsonify({"error": "Not authenticated"}), 401
+        
         if current_user.role != 'patient':
+            print(f"❌ SOS TRIGGER: User role is {current_user.role}, not 'patient'")
             return jsonify({"error": "Unauthorized"}), 403
         
         patient_id = current_user.id
-        patient = mongo.db.patients.find_one({'_id': ObjectId(patient_id)})
+        print(f"🔍 SOS TRIGGER: Fetching patient with ID {patient_id}")
+        
+        try:
+            patient = mongo.db.patients.find_one({'_id': ObjectId(patient_id)})
+        except Exception as e:
+            print(f"❌ SOS TRIGGER: Failed to convert patient_id to ObjectId: {e}")
+            return jsonify({"error": f"Invalid patient ID format: {str(e)}"}), 400
         
         if not patient:
+            print(f"❌ SOS TRIGGER: Patient not found with ID {patient_id}")
             return jsonify({"error": "Patient not found"}), 404
         
         guardian_id = patient.get('guardian_id')
+        print(f"✓ SOS TRIGGER: Patient found - {patient.get('name')} with guardian_id {guardian_id}")
         
         # Create SOS alert record
         sos_alert = {
@@ -647,7 +745,19 @@ def sos_trigger():
             'message': f"Emergency SOS alert from {patient.get('name', 'Patient')}"
         }
         
-        result = mongo.db.sos_alerts.insert_one(sos_alert)
+        try:
+            result = mongo.db.sos_alerts.insert_one(sos_alert)
+            print(f"✓ SOS TRIGGER: SOS alert created with ID {result.inserted_id}")
+        except Exception as e:
+            print(f"❌ SOS TRIGGER: Failed to insert SOS alert: {e}")
+            return jsonify({"error": f"Failed to create alert: {str(e)}"}), 500
+        
+        # Set is_emergency to True on the patient
+        try:
+            mongo.db.patients.update_one({'_id': ObjectId(patient_id)}, {'$set': {'is_emergency': True}})
+            print(f"✓ SOS TRIGGER: Patient emergency flag updated")
+        except Exception as e:
+            print(f"⚠️ SOS TRIGGER: Failed to update patient emergency flag: {e}")
         
         # Create notification for guardian
         notification = {
@@ -662,7 +772,11 @@ def sos_trigger():
             'priority': 'critical'
         }
         
-        mongo.db.notifications.insert_one(notification)
+        try:
+            mongo.db.notifications.insert_one(notification)
+            print(f"✓ SOS TRIGGER: Notification created for guardian {guardian_id}")
+        except Exception as e:
+            print(f"⚠️ SOS TRIGGER: Failed to insert notification: {e}")
         
         print(f"🚨 SOS ALERT TRIGGERED: Patient {patient.get('name')} (ID: {patient_id})")
         
@@ -681,34 +795,42 @@ def sos_trigger():
                 emergency_contact = patient.get('phone')
             
             contacts_to_notify = []
-            if emergency_contact: contacts_to_notify.append(emergency_contact)
-            if hospital_contact: contacts_to_notify.append(hospital_contact)
+            if emergency_contact: 
+                contacts_to_notify.append(emergency_contact)
+            if hospital_contact: 
+                contacts_to_notify.append(hospital_contact)
+            
+            print(f"📱 SOS TRIGGER: Emergency contacts to notify: {contacts_to_notify}")
             
             if twilio_account_sid and twilio_auth_token and contacts_to_notify and (twilio_phone_number or twilio_messaging_service_sid):
-                client = Client(twilio_account_sid, twilio_auth_token)
-                
-                msg_kwargs_base = {
-                    "body": f"🚨 GOLDENSAGE EMERGENCY 🚨\nAlert from: {patient.get('name')}\nLogin to Guardian Dashboard immediately for more details."
-                }
-                
-                if twilio_messaging_service_sid:
-                    msg_kwargs_base["messaging_service_sid"] = twilio_messaging_service_sid
-                else:
-                    msg_kwargs_base["from_"] = twilio_phone_number
+                try:
+                    client = Client(twilio_account_sid, twilio_auth_token)
+                    
+                    msg_kwargs_base = {
+                        "body": f"🚨 GOLDENSAGE EMERGENCY 🚨\nAlert from: {patient.get('name')}\nLogin to Guardian Dashboard immediately for more details."
+                    }
+                    
+                    if twilio_messaging_service_sid:
+                        msg_kwargs_base["messaging_service_sid"] = twilio_messaging_service_sid
+                    else:
+                        msg_kwargs_base["from_"] = twilio_phone_number
 
-                for contact in set(contacts_to_notify): # set() prevents duplicate texts if numbers are the same
-                    try:
-                        kwargs = msg_kwargs_base.copy()
-                        kwargs["to"] = contact
-                        sms_message = client.messages.create(**kwargs)
-                        print(f"SMS sent successfully to {contact}! SID: {sms_message.sid}")
-                    except Exception as e:
-                        print(f"Failed to send SMS to {contact}: {e}")
+                    for contact in set(contacts_to_notify):
+                        try:
+                            kwargs = msg_kwargs_base.copy()
+                            kwargs["to"] = contact
+                            sms_message = client.messages.create(**kwargs)
+                            print(f"✓ SMS sent to {contact}! SID: {sms_message.sid}")
+                        except Exception as e:
+                            print(f"❌ Failed to send SMS to {contact}: {e}")
+                except Exception as twilio_error:
+                    print(f"❌ Failed to initialize Twilio client: {twilio_error}")
             else:
-                print("Twilio credentials or contact numbers missing. SMS not sent.")
+                print("⚠️ Twilio credentials or contact numbers missing. SMS not sent.")
         except Exception as sms_error:
-            print(f"Failed to initialize Twilio client: {sms_error}")
+            print(f"⚠️ Twilio SMS sending failed: {sms_error}")
         
+        print(f"✅ SOS trigger endpoint finished successfully")
         return jsonify({
             "status": "success",
             "message": "Emergency alert sent to your guardian",
@@ -716,7 +838,60 @@ def sos_trigger():
         })
         
     except Exception as e:
-        print(f"Error in SOS trigger: {e}")
+        import traceback
+        print(f"❌ Error in SOS trigger: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({"error": f"SOS trigger failed: {str(e)}"}), 500
+
+@app.route('/feature/sos/debug', methods=['GET', 'POST'])
+@login_required
+def sos_debug():
+    """Debug endpoint to check SOS functionality"""
+    try:
+        debug_info = {
+            "user_authenticated": True,
+            "user_id": current_user.id if current_user else None,
+            "user_role": current_user.role if current_user else None,
+            "user_name": current_user.name if current_user else None,
+        }
+        
+        if current_user and current_user.role == 'patient':
+            try:
+                patient = mongo.db.patients.find_one({'_id': ObjectId(current_user.id)})
+                if patient:
+                    debug_info["patient_found"] = True
+                    debug_info["patient_name"] = patient.get('name')
+                    debug_info["patient_guardian_id"] = str(patient.get('guardian_id')) if patient.get('guardian_id') else None
+                    debug_info["patient_phone"] = patient.get('phone')
+                    debug_info["required_fields"] = {
+                        "name": bool(patient.get('name')),
+                        "guardian_id": bool(patient.get('guardian_id')),
+                        "phone": bool(patient.get('phone'))
+                    }
+                else:
+                    debug_info["patient_found"] = False
+            except Exception as e:
+                debug_info["patient_lookup_error"] = str(e)
+        
+        # Check Twilio configuration
+        debug_info["twilio_configured"] = {
+            "account_sid": bool(os.getenv('TWILIO_ACCOUNT_SID')),
+            "auth_token": bool(os.getenv('TWILIO_AUTH_TOKEN')),
+            "phone_number": bool(os.getenv('TWILIO_PHONE_NUMBER')),
+            "messaging_service_sid": bool(os.getenv('TWILIO_MESSAGING_SERVICE_SID')),
+            "emergency_contact": bool(os.getenv('EMERGENCY_CONTACT_NUMBER')),
+            "hospital_contact": bool(os.getenv('HOSPITAL_CONTACT_NUMBER'))
+        }
+        
+        # Check MongoDB connectivity
+        try:
+            mongo.db.command('ping')
+            debug_info["mongodb"] = "Connected"
+        except Exception as e:
+            debug_info["mongodb"] = f"Error: {str(e)}"
+        
+        return jsonify(debug_info)
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/feature/sos/dashboard')
@@ -742,6 +917,172 @@ def sos_dashboard():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# --- MEDICAL REPORTS API ---
+@app.route('/api/reports/upload', methods=['POST'])
+@login_required
+def upload_report():
+    if current_user.role not in ['patient', 'guardian']:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    patient_id = current_user.id
+    if current_user.role == 'guardian':
+        patient_id = request.form.get('patient_id')
+        if not patient_id:
+            return jsonify({'error': 'Missing patient_id'}), 400
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Add timestamp to make filename unique
+        time_str = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        unique_filename = f"{time_str}_{filename}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        file.save(filepath)
+        
+        report_data = {
+            'patient_id': patient_id,
+            'filename': filename,
+            'filepath': f"/{app.config['UPLOAD_FOLDER']}/{unique_filename}",
+            'upload_date': datetime.utcnow(),
+            'file_size': os.path.getsize(filepath)
+        }
+        
+        result = mongo.db.reports.insert_one(report_data)
+        report_data['_id'] = str(result.inserted_id)
+        # convert datetime for json
+        report_data['upload_date'] = report_data['upload_date'].isoformat()
+        
+        return jsonify({'status': 'success', 'report': report_data})
+        
+    return jsonify({'error': 'File type not allowed'}), 400
+
+@app.route('/api/reports', methods=['GET'])
+@login_required
+def get_reports():
+    if current_user.role not in ['patient', 'guardian']:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    patient_id = current_user.id
+    if current_user.role == 'guardian':
+        patient_id = request.args.get('patient_id')
+        if not patient_id:
+            return jsonify({'error': 'Missing patient_id'}), 400
+
+    # Query by patient_id (same list for guardian and patient); support both string and ObjectId in DB
+    try:
+        q = {'$or': [{'patient_id': patient_id}, {'patient_id': ObjectId(patient_id)}]}
+    except Exception:
+        q = {'patient_id': patient_id}
+    reports = list(mongo.db.reports.find(q).sort('upload_date', -1))
+    for r in reports:
+        r['_id'] = str(r['_id'])
+        r['upload_date'] = r['upload_date'].isoformat() if isinstance(r['upload_date'], datetime) else r['upload_date']
+        
+    return jsonify({'reports': reports})
+
+# --- GAMES API ---
+@app.route('/games/<path:path>')
+@login_required
+def send_games(path):
+    if current_user.role != 'patient' and current_user.role != 'guardian':
+        return "Unauthorized", 403
+    # Serve files directly from the games folder
+    return send_from_directory('games', path)
+
+# --- SUDOKU GAME LOGIC ---
+
+def generate_4x4():
+    return [
+        [1, 0, 0, 4],
+        [0, 4, 1, 0],
+        [0, 1, 3, 0],
+        [4, 0, 0, 2]
+    ]
+
+def generate_9x9():
+    return [
+        [5,3,0,0,7,0,0,0,0],
+        [6,0,0,1,9,5,0,0,0],
+        [0,9,8,0,0,0,0,6,0],
+        [8,0,0,0,6,0,0,0,3],
+        [4,0,0,8,0,3,0,0,1],
+        [7,0,0,0,2,0,0,0,6],
+        [0,6,0,0,0,0,2,8,0],
+        [0,0,0,4,1,9,0,0,5],
+        [0,0,0,0,8,0,0,7,9]
+    ]
+
+def generate_grid(size):
+    if size == 9:
+        return deepcopy(generate_9x9())
+    return deepcopy(generate_4x4())
+
+def can_place(grid, row, col, num, size):
+    # Row check
+    if num in grid[row]:
+        return False
+    # Column check
+    for i in range(size):
+        if grid[i][col] == num:
+            return False
+    # Box check
+    box_size = int(size ** 0.5)
+    start_row = (row // box_size) * box_size
+    start_col = (col // box_size) * box_size
+    for i in range(box_size):
+        for j in range(box_size):
+            if grid[start_row + i][start_col + j] == num:
+                return False
+    return True
+
+@app.route("/sudoku")
+@login_required
+def sudoku():
+    size = request.args.get("size", 4, type=int)
+    user_id = current_user.id
+    if user_id not in user_games or user_games[user_id]["size"] != size:
+        grid = generate_grid(size)
+        user_games[user_id] = {
+            "size": size,
+            "grid": grid,
+            "original": deepcopy(grid)
+        }
+    game = user_games[user_id]
+    return render_template(
+        "suduko.html",
+        grid=game["grid"],
+        size=size
+    )
+
+@app.route("/sudoku/check", methods=["POST"])
+@login_required
+def check_sudoku():
+    user_id = current_user.id
+    data = request.json
+    row = data["row"]
+    col = data["col"]
+    num = data["num"]
+    game = user_games.get(user_id)
+    if not game:
+        return jsonify({"status": "error"})
+    grid = game["grid"]
+    original = game["original"]
+    size = game["size"]
+    if original[row][col] != 0:
+        return jsonify({"status": "blocked"})
+    if can_place(grid, row, col, num, size):
+        grid[row][col] = num
+        return jsonify({"status": "correct"})
+    else:
+        return jsonify({"status": "wrong"})
 
 
 # ═══ Voice Assistant (GoldenSage) ═══

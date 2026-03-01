@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoldenSage – Patient Setup</title>
+  <title>GoldenSage – User Setup</title>
 
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap"
@@ -307,21 +307,21 @@
         <div class="card">
           <div class="profile-pic">
             <label for="patientImage">
-              <img id="patientPreview" src="https://via.placeholder.com/130?text=Patient+Pic"
-                title="Upload Patient Image">
+              <img id="patientPreview" src="https://via.placeholder.com/130?text=User+Pic"
+                title="Upload User Image">
             </label>
             <input type="file" id="patientImage" style="display: none;" accept="image/*"
               onchange="previewPatient(event)">
           </div>
           <div class="profile-info">
-            <h4 id="patientDisplay">New Patient</h4>
+            <h4 id="patientDisplay">New User</h4>
             <p>Care Profile Setup</p>
           </div>
         </div>
 
         <div class="card branding-card">
           <div class="brand-logo"><i class="fas fa-heartbeat"></i></div>
-          <h3>Patient Care</h3>
+          <h3>User Care</h3>
           <p class="brand-tagline">Personalized monitoring and safety for your loved ones.</p>
           <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=80"
             alt="Care" class="brand-img">
@@ -331,31 +331,31 @@
       <div class="main">
 
         <div class="card" style="margin-bottom: 25px;">
-          <h3><i class="fas fa-user-shield"></i> Guardian Details</h3>
+          <h3><i class="fas fa-user-shield"></i> Caretaker Details</h3>
           <div class="form-group">
-            <label class="required">Guardian Phone Number</label>
-            <input id="gPhone" type="tel" placeholder="Enter guardian phone number" required>
+            <label class="required">Caretaker Phone Number</label>
+            <input id="gPhone" type="tel" placeholder="Enter caretaker phone number" required>
           </div>
           <div class="form-group">
-            <label class="required">Guardian Email ID</label>
-            <input id="gEmail" type="email" placeholder="Enter guardian email" required
+            <label class="required">Caretaker Email ID</label>
+            <input id="gEmail" type="email" placeholder="Enter caretaker email" required
               oninput="checkEmail(this.value)">
             <div id="emailWarning" class="email-warning">Valid email ID is required (e.g. user@example.com)</div>
           </div>
         </div>
 
         <div class="card" style="margin-bottom: 25px;">
-          <h3><i class="fas fa-id-card"></i> Patient Basic Information</h3>
+          <h3><i class="fas fa-id-card"></i> User Basic Information</h3>
           <div class="form-group">
-            <label class="required">Patient's Full Name</label>
-            <input id="pName" type="text" placeholder="Enter patient's name" oninput="updateSidebarName()" required>
+            <label class="required">User's Full Name</label>
+            <input id="pName" type="text" placeholder="Enter user's name" oninput="updateSidebarName()" required>
           </div>
           <div class="form-group">
             <label class="required">Age</label>
             <input type="number" placeholder="Enter age" required>
           </div>
           <div class="form-group">
-            <label class="required">Relation with the Patient</label>
+            <label class="required">Relation with the User</label>
             <input type="text" placeholder="e.g. Son, Daughter, Spouse" required>
           </div>
           <div class="form-group">
@@ -482,7 +482,7 @@
 
     function updateSidebarName() {
       const name = document.getElementById('pName').value;
-      document.getElementById('patientDisplay').innerText = name ? name : "New Patient";
+      document.getElementById('patientDisplay').innerText = name ? name : "New User";
     }
 
     let reminderCount = 0;
@@ -514,7 +514,7 @@
         return;
       }
       if (!name) {
-        alert("Please enter the patient's name.");
+        alert("Please enter the user's name.");
         return;
       }
 

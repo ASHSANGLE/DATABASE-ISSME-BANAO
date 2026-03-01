@@ -650,9 +650,11 @@
             0% {
                 box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
             }
+
             50% {
                 box-shadow: 0 8px 30px rgba(225, 29, 72, 0.6);
             }
+
             100% {
                 box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
             }
@@ -691,6 +693,7 @@
                 transform: scale(0.8) translateY(-20px);
                 opacity: 0;
             }
+
             to {
                 transform: scale(1) translateY(0);
                 opacity: 1;
@@ -704,9 +707,19 @@
         }
 
         @keyframes sos-icon-shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-5deg); }
-            75% { transform: rotate(5deg); }
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-5deg);
+            }
+
+            75% {
+                transform: rotate(5deg);
+            }
         }
 
         .sos-modal-title {
@@ -717,7 +730,7 @@
         }
 
         .sos-modal-text {
-            font-size: 0.95rem;
+            font-size: 1.3rem;
             color: #64748B;
             margin-bottom: 30px;
             line-height: 1.6;
@@ -789,10 +802,13 @@
         }
 
         @keyframes alarmPulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1);
                 box-shadow: 0 10px 40px rgba(255, 71, 87, 0.5);
             }
+
             50% {
                 transform: scale(1.02);
                 box-shadow: 0 15px 50px rgba(255, 71, 87, 0.8);
@@ -800,9 +816,12 @@
         }
 
         @keyframes alarmFlash {
-            0%, 100% {
+
+            0%,
+            100% {
                 background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
             }
+
             50% {
                 background: linear-gradient(135deg, #ff6348 0%, #ff4757 100%);
             }
@@ -828,12 +847,16 @@
         }
 
         @keyframes bellRing {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: rotate(0deg);
             }
+
             25% {
                 transform: rotate(-15deg);
             }
+
             75% {
                 transform: rotate(15deg);
             }
@@ -1682,13 +1705,12 @@
             </div>
             <div>
                 <span class="brand-name">GoldenSage</span>
-                <div style="font-size: 0.7rem; color: #CCD4E6; font-weight: 600; letter-spacing: 1px;">PATIENT PORTAL</div>
+                <div style="font-size: 0.7rem; color: #CCD4E6; font-weight: 600; letter-spacing: 1px;">USER PORTAL
+                </div>
             </div>
         </div>
         <div class="header-right">
-            <div style="color: #CCD4E6; font-weight: 600; margin-right: 15px; font-size: 0.9rem;">
-                <i class="fa-solid fa-circle-user"></i> <span id="patientName">Patient</span>
-            </div>
+            <span id="patientName" style="display: none;" aria-hidden="true"></span>
             <a href="/main" class="home-ref">
                 <i class="fa-solid fa-house"></i>
                 <span> Home</span>
@@ -1698,168 +1720,46 @@
 
     <aside class="sidebar">
 
-        <div class="nav-link active" onclick="switchTab('p-home', this)"><i class="fa-solid fa-house-user"></i> My Day
+        <div class="nav-link active" onclick="switchTab('p-profile', this)"><i class="fa-solid fa-circle-user"></i> My
+            Profile
         </div>
         <div class="nav-link" onclick="switchTab('p-medicine', this)"><i class="fa-solid fa-pills"></i> Medicine</div>
-        <div class="nav-link" onclick="switchTab('p-profile', this)"><i class="fa-solid fa-circle-user"></i> My Profile
-        </div>
 
         <div class="nav-link" onclick="window.location.href='/voice-assistant'">
             <i class="fa-solid fa-microphone"></i> Voice Assistant
         </div>
-        <div class="nav-link" onclick="window.location.href='/connection'">
-            <i class="fa-solid fa-hubspot"></i> Connections
+        <div class="nav-link" onclick="switchTab('p-reports', this)">
+            <i class="fa-solid fa-file-medical"></i> Medical Reports
+        </div>
+
+        <div class="nav-link" onclick="switchTab('p-games', this)">
+            <i class="fa-solid fa-gamepad"></i> Games
         </div>
         <div class="nav-link" onclick="handleLogout()" style="margin-top: 10px; color: #E11D48;"><i
                 class="fa-solid fa-right-from-bracket"></i> Logout</div>
-        
+
         <!-- SOS Emergency Button -->
-        <button class="sos-button sos-pulse" onclick="triggerSOSConfirm()" title="Emergency SOS - Notifies your guardian immediately">
+        <button class="sos-button sos-pulse" onclick="triggerSOSConfirm()"
+            title="Emergency SOS - Notifies your caretaker immediately">
             <i class="fa-solid fa-alarm"></i> SOS EMERGENCY
         </button>
     </aside>
 
     <main class="main-wrapper">
 
-        <div id="p-home" class="view-content active">
-            <div class="welcome-box">
-                <div>
-                    <h1 style="margin: 0; font-size: 2.5rem;" id="welcomeMessage">Welcome to Your Health Portal</h1>
-                    <p style="opacity: 0.9; font-size: 1.1rem; margin-top: 10px;" id="taskSummary">Loading your health data...</p>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 1.2rem; font-weight: 700;" id="currentDate"></div>
-                    <div style="opacity: 0.8;" id="weatherInfo">Your health dashboard</div>
-                </div>
-            </div>
-
-            <div class="vitals-strip" id="vitalsContainer">
-                <!-- Vitals injected by JS -->
-                <div class="mini-vital">
-                    <div class="icon-circle" style="background: #FFE4E6; color: #E11D48;"><i class="fa-solid fa-heart-pulse"></i></div>
-                    <div><small style="color: #64748B;">Heart Rate</small><br><strong>72 bpm</strong></div>
-                </div>
-                <div class="mini-vital">
-                    <div class="icon-circle" style="background: #E0F2FE; color: #0284C7;"><i class="fa-solid fa-droplet"></i></div>
-                    <div><small style="color: #64748B;">Blood Sugar</small><br><strong>110 mg/dL</strong></div>
-                </div>
-                <div class="mini-vital">
-                    <div class="icon-circle" style="background: #F0FDF4; color: #16A34A;"><i class="fa-solid fa-shoe-prints"></i></div>
-                    <div><small style="color: #64748B;">Steps</small><br><strong>2,450</strong></div>
-                </div>
-            </div>
-
-            <div class="action-grid">
-                <div class="card">
-                    <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Today's Schedule</div>
-                    <div id="tasksContainer">
-                        <div class="todo-item">
-                            <div>
-                                <strong>Morning Medication</strong><br>
-                                <small style="color: #64748B;">Lisinopril • 10mg after breakfast</small>
-                            </div>
-                            <div class="check-btn" onclick="toggleTask(this)"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="todo-item">
-                            <div>
-                                <strong>Physiotherapy Walk</strong><br>
-                                <small style="color: #64748B;">15 mins light walking in the garden</small>
-                            </div>
-                            <div class="check-btn" onclick="toggleTask(this)"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="todo-item">
-                            <div>
-                                <strong>Hydration Goal</strong><br>
-                                <small style="color: #64748B;">Drink 2 glasses of water</small>
-                            </div>
-                            <div class="check-btn" onclick="toggleTask(this)"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="todo-item">
-                            <div>
-                                <strong>Blood Pressure Check</strong><br>
-                                <small style="color: #64748B;">Log reading before lunch</small>
-                            </div>
-                            <div class="check-btn" onclick="toggleTask(this)"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="todo-item">
-                            <div>
-                                <strong>Afternoon Vitamin</strong><br>
-                                <small style="color: #64748B;">Vitamin D3 • During lunch</small>
-                            </div>
-                            <div class="check-btn" onclick="toggleTask(this)"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title"><i class="fa-solid fa-user-shield" style="color: var(--accent);"></i> My
-                        Care Team</div>
-
-                    <div class="doc-profile-card">
-                        <div class="doc-header">
-                            <div class="doc-avatar"><i class="fa-solid fa-heart-pulse"></i></div>
-                            <div><strong>Dr. Sarah Chen</strong><br><small
-                                    style="color:var(--success)">Cardiologist</small></div>
-                        </div>
-                        <div class="doc-desc">
-                            Specializes in geriatric heart health. She manages your hypertension and monitors your daily
-                            heart rate logs.
-                        </div>
-                    </div>
-
-                    <div class="doc-profile-card">
-                        <div class="doc-header">
-                            <div class="doc-avatar"><i class="fa-solid fa-person-walking"></i></div>
-                            <div><strong>Dr. Elizabeth Sterling</strong><br><small
-                                    style="color:var(--primary)">Physiotherapist</small></div>
-                        </div>
-                        <div class="doc-desc">
-                            Focuses on your balance and mobility. She assigned your 10-minute morning stretching
-                            routine.
-                        </div>
-                    </div>
-
-                    <div class="doc-profile-card">
-                        <div class="doc-header">
-                            <div class="doc-avatar"><i class="fa-solid fa-apple-whole"></i></div>
-                            <div><strong>Dr. Jonathan Hyde</strong><br><small style="color:#6366f1">Nutritionist</small>
-                            </div>
-                        </div>
-                        <div class="doc-desc">
-                            In charge of your low-sodium diet plan and ensures your vitamin levels are optimal for
-                            energy.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
 
         <div id="p-medicine" class="view-content">
 
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
-                <div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                        <span
-                            style="color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem;">My
-                            Cabinet</span>
-                        <span
-                            style="background: #DCFCE7; color: #16A34A; padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; border: 1px solid #BBF7D0;">
-                            <i class="fa-solid fa-check-circle"></i> 3 MEDICINES IN STOCK
-                        </span>
-                    </div>
-                    <h2 style="margin: 0; font-size: 2.2rem; font-weight: 800;">Digital Pharmacy</h2>
-                </div>
-                <button
-                    style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer;">
-                    <i class="fa-solid fa-truck-medical"></i> Request All Refills
-                </button>
-            </div>
 
-            <div id="upcomingReminderCard" class="card" style="margin-bottom: 30px; background: linear-gradient(135deg, var(--primary) 0%, #3b5a44 100%); color: white; border: none;">
-                <div class="card-title" style="color: white;"><i class="fa-solid fa-bell" style="color: var(--accent);"></i> Upcoming Reminder</div>
+
+            <div id="upcomingReminderCard" class="card"
+                style="margin-bottom: 30px; background: linear-gradient(135deg, var(--primary) 0%, #3b5a44 100%); color: white; border: none;">
+                <div class="card-title" style="color: white;"><i class="fa-solid fa-bell"
+                        style="color: var(--accent);"></i> Upcoming Reminder</div>
                 <div id="upcomingReminderContent" style="padding: 16px 0; font-size: 1.1rem;">
-                    <p style="margin: 0; opacity: 0.95;">No upcoming doses. Add medicines in the Smart Medication Reminder below.</p>
+                    <p style="margin: 0; opacity: 0.95;">No upcoming doses. Add medicines in the Smart Medication
+                        Reminder below.</p>
                 </div>
             </div>
 
@@ -1876,7 +1776,7 @@
                 </div>
 
                 <div class="med-reminder-card" style="margin-bottom: 14px;">
-                    <label for="mrPatientName" class="med-reminder-label">Patient name (for reminders)</label>
+                    <label for="mrPatientName" class="med-reminder-label">User name (for reminders)</label>
                     <input id="mrPatientName" type="text" class="med-reminder-input" placeholder="Enter your name">
                     <div class="med-time-strip" style="margin-top: 8px;">
                         <span>Current time will be tracked automatically.</span>
@@ -1889,7 +1789,8 @@
                         <div class="med-section" style="border-left-color:#f59e0b;">
                             <div class="med-section-header">
                                 <h3>🌅 Morning</h3>
-                                <button class="med-add-btn med-add-morning" onclick="addMedication('morning')">Add medication</button>
+                                <button class="med-add-btn med-add-morning" onclick="addMedication('morning')">Add
+                                    medication</button>
                             </div>
                             <div id="morningList"></div>
                         </div>
@@ -1897,7 +1798,8 @@
                         <div class="med-section" style="border-left-color:#0ea5e9;">
                             <div class="med-section-header">
                                 <h3>☀️ Afternoon</h3>
-                                <button class="med-add-btn med-add-afternoon" onclick="addMedication('afternoon')">Add medication</button>
+                                <button class="med-add-btn med-add-afternoon" onclick="addMedication('afternoon')">Add
+                                    medication</button>
                             </div>
                             <div id="afternoonList"></div>
                         </div>
@@ -1905,7 +1807,8 @@
                         <div class="med-section" style="border-left-color:#6366f1;">
                             <div class="med-section-header">
                                 <h3>🌙 Evening & Night</h3>
-                                <button class="med-add-btn med-add-evening" onclick="addMedication('evening')">Add medication</button>
+                                <button class="med-add-btn med-add-evening" onclick="addMedication('evening')">Add
+                                    medication</button>
                             </div>
                             <div id="eveningList"></div>
                         </div>
@@ -1928,7 +1831,8 @@
                                     <span class="med-summary-label">Pending</span>
                                 </div>
                             </div>
-                            <p id="nextDoseText" style="margin-top: 10px; font-size: 0.85rem; color: rgba(226,232,240,0.95);">
+                            <p id="nextDoseText"
+                                style="margin-top: 10px; font-size: 0.85rem; color: rgba(226,232,240,0.95);">
                                 No medicines scheduled in your reminder.
                             </p>
                         </div>
@@ -2064,13 +1968,15 @@
                         </div>
 
                         <div class="time-picker-actions">
-                            <button class="time-picker-btn time-picker-cancel" onclick="closeTimePicker()">Cancel</button>
-                            <button class="time-picker-btn time-picker-confirm" onclick="confirmTimeSelection()">Confirm</button>
+                            <button class="time-picker-btn time-picker-cancel"
+                                onclick="closeTimePicker()">Cancel</button>
+                            <button class="time-picker-btn time-picker-confirm"
+                                onclick="confirmTimeSelection()">Confirm</button>
                         </div>
                     </div>
                 </div>
+            </div>
         </div>
-    </div>
 
         <div id="medicineDetailsModal"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
@@ -2099,13 +2005,27 @@
 
 
 
-        <div id="p-profile" class="view-content">
+        <div id="p-profile" class="view-content active">
+
+            <!-- Welcome Banner (same as home screen) -->
+            <div class="welcome-box" style="margin-bottom: 30px;">
+                <div>
+                    <h1 style="margin: 0; font-size: 2.5rem;" id="profileWelcomeMessage">Good Day, Grandpa! 👋</h1>
+                    <p style="opacity: 0.9; font-size: 1.1rem; margin-top: 10px;" id="profileTaskSummary">Your health
+                        profile & medical background.</p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 1.2rem; font-weight: 700;" id="profileCurrentDate"></div>
+                    <div style="opacity: 0.8;">Your health dashboard</div>
+                </div>
+            </div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
                     <span
                         style="color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem;">Identity
-                        & Medical Background</span>
-                    <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800;">Patient Profile</h2>
+                        &amp; Medical Background</span>
+                    <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800;">User Profile</h2>
                 </div>
                 <button onclick="exportMedicalID()"
                     style="background: white; border: 1px solid #E2E8F0; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">
@@ -2120,7 +2040,6 @@
                         <i class="fa-solid fa-user"></i>
                     </div>
                     <h2 style="margin: 0;">GRANDPA</h2>
-                    <p style="color: #64748B; font-weight: 600;">Patient ID: #GS-88210</p>
 
                     <hr style="border: 0; border-top: 1px solid #F1F5F9; margin: 25px 0;">
 
@@ -2169,40 +2088,7 @@
                                 Emergency Wing B</div>
                         </div>
                     </div>
-                    <div class="card" style="margin-bottom: 25px;">
-                        <div class="card-title" style="font-size: 1rem;"><i class="fa-solid fa-file-medical"
-                                style="color: var(--primary);"></i> Recent Clinical Reports</div>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
-                            <thead>
-                                <tr style="border-bottom: 2px solid #F1F5F9; color: #64748B;">
-                                    <th style="padding: 10px 5px;">Test Type</th>
-                                    <th style="padding: 10px 5px;">Result</th>
-                                    <th style="padding: 10px 5px;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr style="border-bottom: 1px solid #F1F5F9;">
-                                    <td style="padding: 12px 5px;">HbA1c (Diabetes)</td>
-                                    <td style="padding: 12px 5px;"><strong>6.4%</strong></td>
-                                    <td style="padding: 12px 5px;"><span class="badge-green"
-                                            style="padding: 2px 8px; font-size: 0.7rem;">OPTIMAL</span></td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid #F1F5F9;">
-                                    <td style="padding: 12px 5px;">LDL Cholesterol</td>
-                                    <td style="padding: 12px 5px;"><strong>98 mg/dL</strong></td>
-                                    <td style="padding: 12px 5px;"><span class="badge-green"
-                                            style="padding: 2px 8px; font-size: 0.7rem;">STABLE</span></td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid #F1F5F9;">
-                                    <td style="padding: 12px 5px;">Kidney Function (eGFR)</td>
-                                    <td style="padding: 12px 5px;"><strong>72 mL/min</strong></td>
-                                    <td style="padding: 12px 5px;"><span class="badge-red"
-                                            style="padding: 2px 8px; font-size: 0.7rem; background:#FEF3C7; color:#92400E;">MONITOR</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
 
                     <div class="card" style="margin-bottom: 25px;">
                         <div class="card-title" style="font-size: 1rem;"><i class="fa-solid fa-pills"
@@ -2210,16 +2096,6 @@
                         <div id="medsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div style="text-align:center; padding:20px; color:#64748B; grid-column: span 2;">Loading
                                 medications...</div>
-                        </div>
-                    </div>
-
-                    <div class="card" style="margin-bottom: 25px;">
-                        <div class="card-title" style="font-size: 1rem;"><i class="fa-solid fa-clock-rotate-left"
-                                style="color: var(--primary);"></i> Significant Medical History</div>
-                        <div
-                            style="border-left: 2px solid #E2E8F0; margin-left: 10px; padding-left: 20px; font-size: 0.9rem;">
-                            <p><strong>June 2024:</strong> Knee Replacement Surgery (Left) - Successful Recovery.</p>
-                            <p><strong>Nov 2023:</strong> Diagnosed with Type 2 Diabetes; managed via Metformin.</p>
                         </div>
                     </div>
 
@@ -2244,6 +2120,124 @@
 
             </div>
 
+        </div>
+
+        <div id="p-reports" class="view-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+                <div>
+                    <span
+                        style="color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem;">Clinical
+                        Records</span>
+                    <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800;">My Medical Reports</h2>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #64748B;">Your caretaker sees the same
+                        reports on their dashboard — these are one and the same.</p>
+                </div>
+                <button onclick="document.getElementById('reportUploadInput').click()"
+                    style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF Report
+                </button>
+                <input type="file" id="reportUploadInput" accept=".pdf" style="display: none;"
+                    onchange="handleReportUpload(event)">
+            </div>
+
+            <div id="uploadProgressContainer"
+                style="display: none; background: white; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+                <h3 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">Uploading Document...</h3>
+                <div style="width: 100%; background: #E2E8F0; border-radius: 10px; height: 8px; overflow: hidden;">
+                    <div id="uploadProgressBar"
+                        style="width: 0%; height: 100%; background: var(--success); transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <div id="reportsGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <div
+                    style="text-align: center; padding: 40px; color: #64748B; background: white; border-radius: 16px; grid-column: 1 / -1; border: 2px dashed #E2E8F0;">
+                    <i class="fa-solid fa-folder-open"
+                        style="font-size: 3rem; color: #CBD5E1; margin-bottom: 15px;"></i>
+                    <h3 style="margin: 0; color: #475569;">No Medical Reports</h3>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Upload your first PDF report using the button
+                        above.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="p-games" class="view-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+                <div>
+                    <span
+                        style="color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem;">Mental
+                        Exercises</span>
+                    <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800;">Cognitive Games</h2>
+                </div>
+            </div>
+
+            <div id="gamesSelectionGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
+
+                <div class="card"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s;"
+                    onclick="launchGame('/sudoku')">
+                    <div
+                        style="width: 80px; height: 80px; background: #E0F2FE; color: #0284C7; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 15px;">
+                        <i class="fa-solid fa-table-cells"></i>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0;">Sudoku</h3>
+                    <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 20px;">Classic number puzzle to sharpen
+                        your focus and logic.</p>
+                    <button
+                        style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer;">Play
+                        Sudoku</button>
+                </div>
+
+                <div class="card"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s;"
+                    onclick="launchGame('/games/2k48/index.html')">
+                    <div
+                        style="width: 80px; height: 80px; background: #FEF3C7; color: #D97706; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 15px;">
+                        <i class="fa-solid fa-arrow-up-9-1"></i>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0;">2048</h3>
+                    <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 20px;">Slide tiles to combine numbers
+                        and reach the 2048 tile.</p>
+                    <button
+                        style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer;">Play
+                        2048</button>
+                </div>
+
+                <div class="card"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s;"
+                    onclick="launchGame('/games/memory game/index.html')">
+                    <div
+                        style="width: 80px; height: 80px; background: #FCE7F3; color: #DB2777; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 15px;">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0;">Memory Game</h3>
+                    <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 20px;">Flip cards to find matching pairs
+                        and test your memory.</p>
+                    <button
+                        style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer;">Play
+                        Memory Game</button>
+                </div>
+
+            </div>
+
+            <div id="gameEmbedContainer"
+                style="display: none; height: 75vh; width: 100%; flex-direction: column; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;">
+                <div
+                    style="background: #F8FAFC; padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #E2E8F0;">
+                    <button onclick="exitGame()"
+                        style="background: white; border: 1px solid #CBD5E1; color: #475569; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;"
+                        onmouseover="this.style.background='#E2E8F0'; this.style.color='#1E293B'"
+                        onmouseout="this.style.background='white'; this.style.color='#475569'">
+                        <i class="fa-solid fa-arrow-left"></i> Exit Game
+                    </button>
+                    <span style="margin-left: 15px; font-weight: 700; color: #1E293B;" id="gameTitleDisplay">Playing
+                        Game</span>
+                </div>
+                <iframe id="gameIframe" src="" style="width: 100%; flex: 1; border: none;" allowfullscreen></iframe>
+            </div>
+        </div>
 
     </main>
 
@@ -2251,13 +2245,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Set current date
             const today = new Date();
-            document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', 
+            const dateStr = today.toLocaleDateString('en-US',
                 { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
+            document.getElementById('profileCurrentDate').textContent = dateStr;
+
             // Fetch patient data
             fetchPatientInfo();
             fetchDashboardData();
-            
+            fetchReports();
+
             // Initialize SOS button with pulse animation
             const sosBtn = document.querySelector('.sos-button');
             if (sosBtn) {
@@ -2269,7 +2265,7 @@
 
             // Handle hash from voice assistant redirect (e.g. #p-medicine)
             const hash = window.location.hash.replace('#', '');
-            if (hash && ['p-home', 'p-medicine', 'p-profile'].includes(hash)) {
+            if (hash && ['p-medicine', 'p-profile', 'p-reports', 'p-games'].includes(hash)) {
                 const navEl = document.querySelector('.nav-link[onclick*="' + hash + '"]');
                 if (navEl) switchTab(hash, navEl);
             }
@@ -2293,7 +2289,7 @@
                 })
                 .catch(err => {
                     console.error("❌ Error loading patient info:", err);
-                    document.getElementById('patientName').textContent = "Patient";
+                    document.getElementById('patientName').textContent = "User";
                 });
         }
 
@@ -2315,18 +2311,18 @@
                         return;
                     }
                     console.log("✅ Dashboard data loaded:", data);
-                    
+
                     renderVitals(data.vitals || []);
                     renderTasks(data.tasks || []);
                     renderMeds(data.medications || []);
-                    
+
                     // Update task summary
                     const taskCount = (data.tasks || []).length;
                     const completedCount = (data.tasks || []).filter(t => t.is_completed).length;
                     const pendingTasks = taskCount - completedCount;
-                    
+
                     if (pendingTasks > 0) {
-                        document.getElementById('taskSummary').textContent = 
+                        document.getElementById('taskSummary').textContent =
                             `You have ${pendingTasks} task${pendingTasks !== 1 ? 's' : ''} to complete today. Great progress! 💪`;
                     } else if (taskCount > 0) {
                         document.getElementById('taskSummary').textContent = 'All tasks completed! You\'re doing amazing! 🎉';
@@ -2491,7 +2487,7 @@
             const modal = document.getElementById('medicineDetailsModal');
             const iconContainer = document.getElementById('modalIconContainer');
             document.getElementById('modalTitle').innerText = "Refill Requested";
-            document.getElementById('modalDescription').innerText = "Your request for a " + medicineName + " refill has been sent to your guardian.";
+            document.getElementById('modalDescription').innerText = "Your request for a " + medicineName + " refill has been sent to your caretaker.";
             iconContainer.style.background = '#DCFCE7';
             iconContainer.style.color = '#16A34A';
             iconContainer.innerHTML = '<i class="fa-solid fa-truck-medical"></i>';
@@ -2511,9 +2507,9 @@
             const modal = document.getElementById('medicineDetailsModal');
             const iconContainer = document.getElementById('modalIconContainer');
             document.getElementById('modalTitle').innerText = medName;
-            document.getElementById('modalDescription').innerText = 
-                isTaken ? `✅ You've successfully taken ${medName} at ${time}` : 
-                `⏰ Time to take ${medName}. Scheduled at ${time}`;
+            document.getElementById('modalDescription').innerText =
+                isTaken ? `✅ You've successfully taken ${medName} at ${time}` :
+                    `⏰ Time to take ${medName}. Scheduled at ${time}`;
             iconContainer.style.background = isTaken ? '#DCFCE7' : '#FEF3C7';
             iconContainer.style.color = isTaken ? '#16A34A' : '#92400E';
             iconContainer.innerHTML = isTaken ? '<i class="fa-solid fa-check-circle"></i>' : '<i class="fa-solid fa-clock"></i>';
@@ -2533,62 +2529,73 @@
             const sosModal = document.getElementById('sosModal');
             const sosModalContent = sosModal.querySelector('.sos-modal-content');
             const confirmBtn = sosModal.querySelector('.sos-modal-btn.confirm');
-            
+
             // Disable button and show loading state
             confirmBtn.disabled = true;
             confirmBtn.textContent = 'Sending...';
-            
+
             fetch('/feature/sos/trigger', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success' || data.success) {
-                    // Show success message
-                    sosModalContent.innerHTML = `
+                .then(response => {
+                    console.log(`SOS Response status: ${response.status}`);
+                    if (!response.ok) {
+                        return response.json().catch(() => {
+                            throw new Error(`Server error: ${response.status}`);
+                        }).then(errData => {
+                            throw new Error(errData.error || `Server error: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('SOS Response:', data);
+                    if (data.status === 'success' || data.success) {
+                        // Show success message
+                        sosModalContent.innerHTML = `
                         <div class="sos-modal-icon" style="animation: none;">
                             <i class="fa-solid fa-check-circle" style="color: #10B981;"></i>
                         </div>
                         <div class="sos-modal-title" style="color: #10B981;">SOS ACTIVATED!</div>
                         <div class="sos-modal-text">
-                            <p>Your emergency alert has been sent to your guardian.</p>
-                            <p>They will receive immediate notification and can track your location.</p>
+                            <p>Your emergency alert has been sent to your caretaker.</p>
                         </div>
                         <button onclick="closeSOS()" class="sos-modal-btn confirm" style="background: #10B981;">
                             <i class="fa-solid fa-check"></i> OK
                         </button>
                     `;
-                } else {
-                    throw new Error('SOS trigger failed');
-                }
-            })
-            .catch(error => {
-                console.error('SOS Error:', error);
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = 'Confirm SOS';
-                sosModalContent.innerHTML = `
+                    } else {
+                        throw new Error(data.message || 'SOS trigger failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('SOS Error:', error);
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Confirm SOS';
+                    sosModalContent.innerHTML = `
                     <div class="sos-modal-icon" style="color: #E11D48;">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
                     <div class="sos-modal-title">Error Sending SOS</div>
                     <div class="sos-modal-text">
-                        <p>Failed to send emergency alert. Please try again or call emergency services directly.</p>
+                        <p>${error.message || 'Failed to send emergency alert. Please try again or call emergency services directly.'}</p>
                     </div>
                     <div class="sos-modal-buttons">
                         <button onclick="closeSOS()" class="sos-modal-btn cancel">Close</button>
                         <button onclick="confirmSOS()" class="sos-modal-btn confirm">Retry</button>
                     </div>
                 `;
-            });
+                });
         }
 
         function closeSOS() {
             const sosModal = document.getElementById('sosModal');
             const sosModalContent = sosModal.querySelector('.sos-modal-content');
-            
+
             // Reset modal content
             sosModalContent.innerHTML = `
                 <div class="sos-modal-icon">
@@ -2596,15 +2603,14 @@
                 </div>
                 <div class="sos-modal-title">Emergency SOS Alert</div>
                 <div class="sos-modal-text">
-                    <p>Are you sure you want to send an emergency alert to your guardian?</p>
-                    <p style="font-size: 0.85rem; color: #999; margin-top: 10px;">This action will immediately notify your guardian with your location.</p>
+                <p>Are you sure you want to send an emergency alert to your caretaker?</p>
                 </div>
                 <div class="sos-modal-buttons">
                     <button onclick="cancelSOS()" class="sos-modal-btn cancel">Cancel</button>
                     <button onclick="confirmSOS()" class="sos-modal-btn confirm">Send SOS</button>
                 </div>
             `;
-            
+
             sosModal.classList.remove('active');
         }
     </script>
@@ -2730,7 +2736,7 @@
                         return;
                     }
 
-                    const patientName = data.patientName || 'Patient';
+                    const patientName = data.patientName || 'User';
                     const medicationInfo = {
                         name: dose.name || 'Medication',
                         dosage: dose.dosage || '',
@@ -2835,13 +2841,13 @@
                 }
             });
 
-                if (found) {
-                    localStorage.setItem('medicationReminderData', JSON.stringify(data));
-                    updateMedicationCheckboxInUI(medicationName, true);
-                    updateSummary();
-                    updateUpcomingReminder();
-                }
+            if (found) {
+                localStorage.setItem('medicationReminderData', JSON.stringify(data));
+                updateMedicationCheckboxInUI(medicationName, true);
+                updateSummary();
+                updateUpcomingReminder();
             }
+        }
 
         function updateUpcomingReminder() {
             const el = document.getElementById('upcomingReminderContent');
@@ -2869,7 +2875,7 @@
                 const [h, m] = next.med.time.split(':').map(Number);
                 const period = h >= 12 ? 'PM' : 'AM';
                 const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-                return `${h12}:${String(m || 0).padStart(2,'0')} ${period}`;
+                return `${h12}:${String(m || 0).padStart(2, '0')} ${period}`;
             })() : next.med.time;
             el.innerHTML = `<p style="margin:0 0 8px 0; font-weight:700; font-size:1.2rem;">${next.med.name || 'Medication'}</p><p style="margin:0; opacity:0.9;">⏰ ${time12}</p>${next.med.dosage ? `<p style="margin:4px 0 0 0; font-size:0.9rem; opacity:0.85;">${next.med.dosage}</p>` : ''}`;
         }
@@ -3290,8 +3296,8 @@
             const hasExisting =
                 existing &&
                 ((existing.morning && existing.morning.length) ||
-                 (existing.afternoon && existing.afternoon.length) ||
-                 (existing.evening && existing.evening.length));
+                    (existing.afternoon && existing.afternoon.length) ||
+                    (existing.evening && existing.evening.length));
 
             // Do not overwrite a schedule the patient has already configured
             if (hasExisting) return;
@@ -3371,7 +3377,7 @@
                 name: "Test medication",
                 dosage: "1 pill",
                 notes: "This is only a test",
-                patientName: document.getElementById('mrPatientName')?.value || 'Patient'
+                patientName: document.getElementById('mrPatientName')?.value || 'User'
             };
 
             showVisibleAlarm(testMedication);
@@ -3487,6 +3493,111 @@
             saveAllData(false);
             closeTimePicker();
         }
+
+        function handleReportUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                alert('Please upload a PDF file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('uploadProgressContainer').style.display = 'block';
+            document.getElementById('uploadProgressBar').style.width = '30%';
+
+            fetch('/api/reports/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => {
+                    document.getElementById('uploadProgressBar').style.width = '70%';
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('uploadProgressBar').style.width = '100%';
+                    setTimeout(() => {
+                        document.getElementById('uploadProgressContainer').style.display = 'none';
+                        document.getElementById('uploadProgressBar').style.width = '0%';
+                        if (data.status === 'success') {
+                            fetchReports();
+                        } else {
+                            alert('Upload failed: ' + (data.error || 'Unknown error'));
+                        }
+                    }, 500);
+                })
+                .catch(err => {
+                    console.error('Upload error:', err);
+                    document.getElementById('uploadProgressContainer').style.display = 'none';
+                    alert('An error occurred during upload.');
+                })
+                .finally(() => {
+                    event.target.value = '';
+                });
+        }
+
+        function fetchReports() {
+            fetch('/api/reports')
+                .then(res => res.json())
+                .then(data => {
+                    const grid = document.getElementById('reportsGrid');
+                    if (!data.reports || data.reports.length === 0) {
+                        grid.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #64748B; background: white; border-radius: 16px; grid-column: 1 / -1; border: 2px dashed #E2E8F0;">
+                            <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: #CBD5E1; margin-bottom: 15px;"></i>
+                            <h3 style="margin: 0; color: #475569;">No Medical Reports</h3>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Upload your first PDF report using the button above.</p>
+                        </div>
+                    `;
+                        return;
+                    }
+
+                    grid.innerHTML = data.reports.map(r => `
+                    <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #E2E8F0; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)'">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                <div style="width: 50px; height: 50px; background: #FEF2F2; color: #EF4444; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: #1E293B; word-break: break-all;">${r.filename}</h4>
+                                    <small style="color: #64748B;">Uploaded: ${new Date(r.upload_date).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="${r.filepath}" target="_blank" style="text-decoration: none; display: block; text-align: center; background: #F1F5F9; color: var(--primary); padding: 10px; border-radius: 10px; font-weight: 700; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">
+                            <i class="fa-solid fa-eye"></i> View PDF
+                        </a>
+                    </div>
+                `).join('');
+                })
+                .catch(err => console.error('Error fetching reports:', err));
+        }
+
+        // --- GAMES LOGIC ---
+        function launchGame(url) {
+            document.getElementById('gamesSelectionGrid').style.display = 'none';
+            const embedContainer = document.getElementById('gameEmbedContainer');
+            embedContainer.style.display = 'flex';
+
+            // Set the title based on the URL
+            const titleDisplay = document.getElementById('gameTitleDisplay');
+            if (url.includes('sudoku')) titleDisplay.innerText = 'Playing Sudoku';
+            else if (url.includes('2k48')) titleDisplay.innerText = 'Playing 2048';
+            else if (url.includes('memory game')) titleDisplay.innerText = 'Playing Memory Game';
+            else titleDisplay.innerText = 'Playing Game';
+
+            document.getElementById('gameIframe').src = url;
+        }
+
+        function exitGame() {
+            document.getElementById('gameIframe').src = ''; // Stop game processes
+            document.getElementById('gameEmbedContainer').style.display = 'none';
+            document.getElementById('gamesSelectionGrid').style.display = 'grid';
+        }
     </script>
 
     <!-- SOS Modal -->
@@ -3497,8 +3608,7 @@
             </div>
             <div class="sos-modal-title">Emergency SOS Alert</div>
             <div class="sos-modal-text">
-                <p>Are you sure you want to send an emergency alert to your guardian?</p>
-                <p style="font-size: 0.85rem; color: #999; margin-top: 10px;">This action will immediately notify your guardian with your location.</p>
+                <p>Are you sure you want to send an emergency alert to your caretaker?</p>
             </div>
             <div class="sos-modal-buttons">
                 <button onclick="cancelSOS()" class="sos-modal-btn cancel">Cancel</button>
@@ -3518,7 +3628,7 @@
 
             <h2 style="color:#333; margin-bottom:10px;">Refill Requested</h2>
             <p style="color:#666; margin-bottom:25px;">Your request for a medication refill has been sent to your
-                guardian.</p>
+                caretaker.</p>
 
             <button onclick="document.getElementById('refill-modal').style.display='none'"
                 style="background:#5b7c5b; color:white; border:none; padding:15px; border-radius:10px; cursor:pointer; width:100%; font-weight:bold; font-size:16px;">

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoldenSage – Patient Signup</title>
+  <title>GoldenSage – User Signup</title>
 
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap"
@@ -407,12 +407,12 @@
 
       <div class="profile-card">
         <label for="pImgUpload" class="upload-container">
-          <img id="pPreview" src="https://via.placeholder.com/150?text=Patient+Photo" alt="Upload Photo">
+          <img id="pPreview" src="https://via.placeholder.com/150?text=User+Photo" alt="Upload Photo">
           <div class="upload-overlay"><i class="fas fa-camera"></i></div>
         </label>
         <input type="file" id="pImgUpload" style="display:none" onchange="preview(event)">
-        <h2 id="pDisplayName">New Patient</h2>
-        <p style="color:#64748b; font-size: 14px; font-weight: 500;">Patient Identity Setup</p>
+        <h2 id="pDisplayName">New User</h2>
+        <p style="color:#64748b; font-size: 14px; font-weight: 500;">User Identity Setup</p>
       </div>
 
       <div class="profile-card" style="padding: 20px; text-align: left; background: rgba(240, 248, 255, 0.9);">
@@ -426,7 +426,7 @@
 
       <div class="branding-card">
         <div class="brand-logo"><i class="fas fa-heartbeat"></i></div>
-        <h3 style="font-family:'Playfair Display'; color:var(--primary);">Patient Care</h3>
+        <h3 style="font-family:'Playfair Display'; color:var(--primary);">User Care</h3>
         <p class="brand-tagline">Personalized monitoring and safety for your loved ones.</p>
         <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=80"
           alt="Care" class="brand-img">
@@ -436,15 +436,15 @@
     <form  class="main-content">
 
       <section class="section-card">
-        <h3><i class="fas fa-user-shield"></i> Guardian Contact (family member)</h3>
+        <h3><i class="fas fa-user-shield"></i> Caretaker Contact (family member)</h3>
         <div class="form-grid">
           <div class="form-group">
-            <label class="required">Guardian Phone</label>
+            <label class="required">Caretaker Phone</label>
             <input type="tel" placeholder="+1 234 567 890" required>
           </div>
           <div class="form-group">
-            <label class="required">Guardian Email</label>
-            <input type="email" id="gEmail" name="guardian_email" oninput="valEmail()" placeholder="guardian@email.com"
+            <label class="required">Caretaker Email</label>
+            <input type="email" id="gEmail" name="guardian_email" oninput="valEmail()" placeholder="caretaker@email.com"
               required>
             <div id="emailWarn" class="warning-text">Valid email required</div>
           </div>
@@ -455,12 +455,12 @@
         <h3><i class="fas fa-id-card"></i> Basic Information</h3>
         <div class="form-grid">
           <div class="form-group full-width">
-            <label class="required">Patient's Full Name</label>
+            <label class="required">User's Full Name</label>
             <input type="text" id="pNameInput" name="name" oninput="updateName()" placeholder="Legal Name" required>
           </div>
           <div class="form-group">
-            <label class="required">Patient Email</label>
-            <input type="email" name="email" placeholder="patient@example.com" required>
+            <label class="required">User Email</label>
+            <input type="email" name="email" placeholder="user@example.com" required>
           </div>
           <div class="form-group">
             <label class="required">Create Password</label>
@@ -472,7 +472,7 @@
           </div>
           <div class="form-group">
             <label class="required">Your Phone Number</label>
-            <input type="tel" name="phone" placeholder="Patient contact number" required>
+            <input type="tel" name="phone" placeholder="User contact number" required>
           </div>
           <div class="form-group full-width">
             <label class="required">Gender</label>
@@ -594,7 +594,7 @@
         </div>
       </section>
 
-      <button type="submit" class="btn-submit">Complete Patient Signup</button>
+      <button type="submit" class="btn-submit">Complete User Signup</button>
     </form>
   </div>
 
@@ -607,7 +607,7 @@
 
     function updateName() {
       const val = document.getElementById('pNameInput').value;
-      document.getElementById('pDisplayName').innerText = val ? val : "New Patient";
+      document.getElementById('pDisplayName').innerText = val ? val : "New User";
     }
 
     function valEmail() {
@@ -632,7 +632,7 @@
       line.style.animation = "scanning 1.5s infinite linear";
       setTimeout(() => {
         line.style.display = "none";
-        alert("Patient biometric data captured and encrypted.");
+        alert("User biometric data captured and encrypted.");
       }, 3000);
     }
   </script>

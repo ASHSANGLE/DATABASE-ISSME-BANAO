@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simon Says | Memory Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🧠 Simon Says</div>
+  <button id="themeToggle" class="theme-toggle">🌙</button>
+</header>
+
+<main>
+
+  <section class="game-card">
+    <h1>Memory Challenge</h1>
+    <p id="message">Press Start to Begin</p>
+
+    <div class="level-display">
+      Level: <span id="levelCount">0</span>
+    </div>
+
+    <div class="board">
+      <button class="color-btn green" data-color="green"></button>
+      <button class="color-btn teal" data-color="teal"></button>
+      <button class="color-btn gold" data-color="gold"></button>
+      <button class="color-btn darkgreen" data-color="darkgreen"></button>
+    </div>
+
+    <button id="startBtn">Start Game</button>
+  </section>
+
+  <section class="instructions">
+    <h2>How To Play</h2>
+    <ul>
+      <li>Click Start Game</li>
+      <li>Watch the blinking pattern carefully</li>
+      <li>Repeat the sequence correctly</li>
+      <li>Each level adds a new color</li>
+      <li>One mistake ends the game</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2026 Simon Says | Designed & Developed by
+    <span class="golden-sage">Golden Sage</span>
+  </p>
+</footer>
+
+<!-- LEVEL POPUP -->
+<div id="levelPopup" class="level-popup"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

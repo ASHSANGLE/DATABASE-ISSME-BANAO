@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guardian Login - Ayur Tech</title>
+    <title>Caretaker Login - Golden Sage</title>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap"
@@ -261,28 +261,9 @@
     <div class="container">
         <div class="content">
 
-            <div class="sidebar">
-                <div class="card" style="text-align: center;">
-                    <i class="fas fa-shield-heart"
-                        style="font-size: 60px; color: var(--primary-medium); margin-bottom: 15px;"></i>
-                    <h3>Guardian Portal</h3>
-                    <p style="font-size: 13px; color: #666;">Manage health records and schedules for your dependents.
-                    </p>
-                </div>
-
-                <div class="card">
-                    <h4 style="margin-bottom: 15px; color: var(--primary-navy);">Quick Actions</h4>
-                    <ul class="info-list">
-                        <li><i class="fas fa-file-medical"></i> View Patient Reports</li>
-                        <li><i class="fas fa-clock"></i> Set Medication Alarms</li>
-                        <li><i class="fas fa-video"></i> Join Doctor Consultation</li>
-                    </ul>
-                </div>
-            </div>
-
             <div class="main">
                 <div class="card">
-                    <h3><i class="fas fa-user-shield"></i> Guardian Login</h3>
+                    <h3><i class="fas fa-user-shield"></i> Caretaker Login</h3>
 
                     {% with messages = get_flashed_messages() %}
                     {% if messages %}
@@ -294,8 +275,8 @@
 
                     <form action="/login/guardian" method="POST">
                         <div class="form-group">
-                            <label>Guardian Email</label>
-                            <input type="email" name="email" placeholder="Enter your guardian email" required>
+                            <label>Caretaker Email</label>
+                            <input type="email" name="email" placeholder="Enter your caretaker email" required>
                         </div>
 
                         <div class="form-group">
@@ -319,21 +300,6 @@
                             <i class="fas fa-lock-open"></i> Secure Login
                         </button>
                     </form>
-
-                    <div style="text-align: center; margin: 20px 0; color: #aaa; font-size: 12px; position: relative;">
-                        <hr style="border: 0; border-top: 1px solid #eee;">
-                        <span
-                            style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 10px;">OR</span>
-                    </div>
-
-                    <div class="social-login">
-                        <button class="social-btn"><i class="fab fa-google"></i> Google</button>
-                        <button class="social-btn"><i class="fab fa-facebook-f"></i> Facebook</button>
-                    </div>
-
-                    <div class="register-link">
-                        <p>New to GoldenSage? <a href="/signup">Create a Account</a></p>
-                    </div>
                 </div>
             </div>
 

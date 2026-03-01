@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoldenSage | Guardian Executive</title>
+    <title>GoldenSage | Caretaker Executive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
@@ -693,40 +693,24 @@
         </div>
 
         <!-- RIGHT SIDE -->
-        <div class="navbar-right">
-            <a href="/main"><i class="fa-solid fa-house">Home </i></a>
-        </div>
+        <div class="navbar-right" style="display: flex; align-items: center; gap: 16px;"></div>
     </div>
 
 
     <aside class="sidebar">
-        <div style="padding: 0 20px 20px 20px;">
-            <label
-                style="color:#64748B; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:5px; display:block;">Select
-                Patient</label>
-            <select id="patientSelect" onchange="loadPatientData(this.value)"
-                style="width:100%; padding:10px; border-radius:10px; border:1px solid #374151; background:#1F2937; color:white;">
-                {% for patient in patients %}
-                <option value="{{ patient._id }}">{{ patient.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
 
-        <div class="nav-link" onclick="switchTab('home-view', this)"><i class="fa-solid fa-house"></i> Home</div>
 
-        <div class="nav-link" onclick="switchTab('daily-updates-view', this)"><i class="fa-solid fa-chart-line"></i>
-            Daily Updates</div>
-        <div class="nav-link" onclick="switchTab('consultation-view', this)"><i class="fa-solid fa-calendar-plus"></i>
-            Consultations</div>
-        <div class="nav-link" onclick="switchTab('patient-profile', this)"><i class="fa-solid fa-user-gear"></i> Patient
+        <div id="nav-patient-profile" class="nav-link" onclick="switchTab('patient-profile', this)"><i class="fa-solid fa-user-gear"></i> User
             Profile</div>
-        <div class="nav-link" onclick="switchTab('preferences-view', this)"><i class="fa-solid fa-sliders"></i>
-            Preferences</div>
+
 
         <div class="nav-link" onclick="window.location.href='/voice-assistant'">
             <i class="fa-solid fa-microphone"></i> Voice Assistant
         </div>
-        <div class="nav-link" onclick="openUnityHub()"><i class="fa-solid fa-link"></i> Unity Hub</div>
+        <div id="nav-g-reports" class="nav-link" onclick="switchTab('g-reports', this)">
+            <i class="fa-solid fa-file-medical"></i> Medical Reports
+        </div>
+
         <div class="sidebar-settings">
 
             <div class="nav-link" onclick="openSettings()">
@@ -742,11 +726,11 @@
     </aside>
 
     <main class="main-wrapper">
-        <div id="home-view" class="view-content active">
+        <div id="home-view" class="view-content">
 
             <div class="hero-banner">
                 <h1 style="font-size:3rem; margin:0 0 20px 0;">Welcome back, Sarah</h1>
-                <p>System status: All health parameters for John are within normal range.</p>
+                <p>System status: All health parameters for Grandpa are within normal range.</p>
             </div>
 
             <div class="nav-card-grid">
@@ -754,10 +738,7 @@
                     <h3>Vitals & Routine</h3>
                     <p>Track health logs and daily activities.</p>
                 </div>
-                <div class="nav-card" onclick="switchTab('consultation-view')"><i class="fa-solid fa-calendar-plus"></i>
-                    <h3>Consultations</h3>
-                    <p>Book medical sessions.</p>
-                </div>
+
                 <div class="nav-card" onclick="switchTab('patient-profile')"><i class="fa-solid fa-user-shield"></i>
                     <h3>Identity & Health</h3>
                     <p>Manage medical records.</p>
@@ -835,9 +816,7 @@
                         Monitoring</span>
                     <h2 style="margin:5px 0 0 0; font-size:1.8rem;">Daily Updates</h2>
                 </div>
-                <button
-                    style="background:var(--danger); color:white; border:none; padding:12px 24px; border-radius:14px; font-weight:800; cursor:pointer;">SEND
-                    SOS ALERT</button>
+
             </div>
 
             <div class="vitals-grid" id="vitalsContainer">
@@ -900,98 +879,14 @@
         </div>
 
 
-        <div id="consultation-view" class="view-content">
 
-            <div style="margin-bottom: 40px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div>
-                        <span
-                            style="color: var(--primary); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Healthcare
-                            Access</span>
-                        <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800; color: #111827;">Book a
-                            Consultation</h2>
-                    </div>
-                    <div style="position: relative; width: 300px;">
-                        <i class="fa-solid fa-magnifying-glass"
-                            style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                        <input type="text" placeholder="Search specialist..."
-                            style="width: 100%; padding: 12px 12px 12px 45px; border-radius: 15px; border: 1px solid #E2E8F0; font-family: inherit; outline: none; transition: 0.3s;"
-                            onfocus="this.style.borderColor='var(--primary)'">
-                    </div>
-                </div>
 
-                <div
-                    style="background: linear-gradient(135deg, #5A7F61 0%, #3d5a44 100%); padding: 25px; border-radius: 30px; color: white; display: flex; align-items: center; gap: 20px; margin-bottom: 30px; box-shadow: 0 20px 25px -5px rgba(90, 127, 97, 0.2);">
-                    <div
-                        style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    </div>
-                    <div>
-                        <h4 style="margin: 0; font-size: 1.1rem;">Instant Matching</h4>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">Not sure who to see? Our system
-                            recommends **Dr. Sarah Chen** based on John's recent heart rate logs.</p>
-                    </div>
-                    <button
-                        style="margin-left: auto; background: white; color: var(--primary); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;">Try
-                        Smart Book</button>
-                </div>
-
-                <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px;">
-                    <div class="filter-pill active-pill">All Specialists</div>
-                    <div class="filter-pill">❤️ Cardiology</div>
-                    <div class="filter-pill">🍎 Nutrition</div>
-                    <div class="filter-pill">🚶 Physiotherapy</div>
-                </div>
-            </div>
-
-            <div class="doctor-grid">
-                <div class="doc-card">
-                    <span class="specialty-tag">Cardiology</span>
-                    <div class="doc-info">
-                        <div class="doc-img"><i class="fa-solid fa-heart-pulse"></i></div>
-                        <div><strong>Dr. Sarah Chen</strong><br><small>15+ Years Experience</small></div>
-                    </div>
-                    <p style="font-size:0.85rem; color:#64748B;">Geriatric heart care and blood pressure management.</p>
-                    <button class="book-btn" onclick="openCalendar()">Schedule Session</button>
-                </div>
-
-                <div class="doc-card">
-                    <span class="specialty-tag">Nutrition</span>
-                    <div class="doc-info">
-                        <div class="doc-img"><i class="fa-solid fa-apple-whole"></i></div>
-                        <div><strong>Dr. Jonathan Hyde</strong><br><small>Geriatric Specialist</small></div>
-                    </div>
-                    <p style="font-size:0.85rem; color:#64748B;">Expert in elderly metabolic health and nutrition plans.
-                    </p>
-                    <button class="book-btn" onclick="openCalendar()">Schedule Session</button>
-                </div>
-
-                <div class="doc-card">
-                    <span class="specialty-tag">Physiotherapy</span>
-                    <div class="doc-info">
-                        <div class="doc-img"><i class="fa-solid fa-person-walking"></i></div>
-                        <div><strong>Dr. Elizabeth Sterling</strong><br><small>Mobility Expert</small></div>
-                    </div>
-                    <p style="font-size:0.85rem; color:#64748B;">Specialized in post-stroke recovery and rehabilitation.
-                    </p>
-                    <button class="book-btn" onclick="openCalendar()">Schedule Session</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="patient-profile" class="view-content">
+        <div id="patient-profile" class="view-content active">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                 <div>
-                    <span
-                        style="color:var(--primary); font-size:0.8rem; font-weight:800; text-transform:uppercase;">Identity
-                        & Medical Background</span>
-                    <h2 style="margin:5px 0 0 0; font-size:2.2rem; font-weight:800;">Patient Profile</h2>
+                    <h1 style="font-size:2rem; margin:0 0 8px 0; font-weight:800; background: linear-gradient(135deg, #E8F0EA 0%, #d4e5d8 100%); padding: 12px 20px; border-radius: 12px; display: inline-block;">Welcome back, Sarah</h1>
+                    <h2 style="margin:5px 0 0 0; font-size:2.2rem; font-weight:800;">User Profile</h2>
                 </div>
-                <button
-                    style="background:white; border:1px solid #E2E8F0; padding:12px 20px; border-radius:12px; font-weight:700; cursor:pointer;"
-                    onclick="printMedicalReport()">
-                    <i class="fa-solid fa-print"></i> Print Medical Report
-                </button>
             </div>
             <div style="display: grid; grid-template-columns: 300px 1fr; gap: 30px;">
                 <div
@@ -1000,8 +895,8 @@
                         style="width:120px; height:120px; background:#F1F5F9; border-radius:40px; margin: 0 auto 20px auto; display:flex; align-items:center; justify-content:center; font-size:3rem; color:var(--primary);">
                         <i class="fa-solid fa-user-tie"></i>
                     </div>
-                    <h3 style="margin:0;">John Willoughby</h3>
-                    <p style="color:#64748B; font-size:0.9rem; margin:5px 0 20px 0;">Patient ID: #GS-88210</p>
+                    <h3 style="margin:0;">Grandpa</h3>
+                    <p style="color:#64748B; font-size:0.9rem; margin:5px 0 20px 0;">User ID: #GS-88210</p>
 
                     <div style="text-align:left; background:#F8FAFC; border-radius:20px; padding:20px;">
                         <div style="margin-bottom:15px;"><small
@@ -1064,41 +959,7 @@
         </div>
 
 
-        <div id="preferences-view" class="view-content">
-            <div style="margin-bottom:30px;">
-                <span
-                    style="color:var(--primary); font-size:0.8rem; font-weight:800; text-transform:uppercase;">Customization</span>
-                <h2 style="margin:5px 0 0 0; font-size:2.2rem; font-weight:800;">System Preferences</h2>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <div class="updates-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
-                    <h3><i class="fa-solid fa-comment-dots"></i> Voice Companion</h3>
-                    <p style="font-size:0.9rem; color:#64748B;">Change the language and persona of the patient's AI
-                        assistant.</p>
-                    <select
-                        style="width:100%; padding:12px; border-radius:12px; border:1px solid #E2E8F0; margin-top:10px;">
-                        <option>English (Default)</option>
-                        <option>Spanish (Español)</option>
-                        <option>French (Français)</option>
-                        <option>Hindi (हिन्दी)</option>
-                    </select>
-                    <button class="book-btn" style="margin-top:20px;">Update Companion</button>
-                </div>
-
-                <div class="updates-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #EDF2F7;">
-                    <h3><i class="fa-solid fa-file-medical"></i> Medical Reports</h3>
-                    <p style="font-size:0.9rem; color:#64748B;">Upload new diagnostics or sync with hospital databases.
-                    </p>
-                    <div
-                        style="border: 2px dashed #E2E8F0; padding: 20px; text-align: center; border-radius: 15px; margin-top: 10px;">
-                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: #CBD5E1;"></i>
-                        <p style="font-size: 0.8rem; margin: 10px 0;">Drag & drop PDF reports here</p>
-                    </div>
-                    <button class="book-btn" style="background:#111827; margin-top:20px;">Sync Health Cloud</button>
-                </div>
-            </div>
-        </div>
 
         <div class="detail-overlay" id="settingsModal">
             <div class="detail-card" style="width:400px;">
@@ -1123,22 +984,61 @@
         </div>
 
 
+        <div id="g-reports" class="view-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+                <div>
+                    <span
+                        style="color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem;">Clinical
+                        Records</span>
+                    <h2 style="margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 800;">User Medical Reports</h2>
+                    <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #64748B;">Same reports as on the user's <strong>Medical Reports</strong> page - uploads and views are shared.</p>
+                </div>
+                <button onclick="document.getElementById('reportUploadInput').click()"
+                    style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF Report
+                </button>
+                <input type="file" id="reportUploadInput" accept=".pdf" style="display: none;"
+                    onchange="handleReportUpload(event)">
+            </div>
+
+            <div id="uploadProgressContainer"
+                style="display: none; background: white; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+                <h3 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem;">Uploading Document...</h3>
+                <div style="width: 100%; background: #E2E8F0; border-radius: 10px; height: 8px; overflow: hidden;">
+                    <div id="uploadProgressBar"
+                        style="width: 0%; height: 100%; background: var(--success); transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <div id="reportsGrid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <div
+                    style="text-align: center; padding: 40px; color: #64748B; background: white; border-radius: 16px; grid-column: 1 / -1; border: 2px dashed #E2E8F0;">
+                    <i class="fa-solid fa-folder-open"
+                        style="font-size: 3rem; color: #CBD5E1; margin-bottom: 15px;"></i>
+                    <h3 style="margin: 0; color: #475569;">No Medical Reports</h3>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Upload the first PDF report for this user.</p>
+                </div>
+            </div>
+        </div>
 
     </main>
     <script>
         // --- DATA LOADING LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             generateMonthlyCalendar();
-            switchTab('home-view');
+            // Load directly on User Profile first
+            switchTab('patient-profile', document.getElementById('nav-patient-profile'));
 
-            // Load initial patient data
-            const select = document.getElementById('patientSelect');
-            if (select && select.value) {
-                loadPatientData(select.value);
+            // Load first patient's data by default (no dropdown)
+            const firstPatientId = "{{ patients[0].id_str if patients else '' }}";
+            if (firstPatientId) {
+                loadPatientData(firstPatientId);
             }
         });
 
         function loadPatientData(patientId) {
+            window.currentPatientId = patientId;
             fetch(`/api/guardian/dashboard-data/${patientId}`)
                 .then(res => {
                     if (res.status === 401 || res.status === 403) {
@@ -1155,7 +1055,7 @@
                     renderVitals(data.vitals);
                     renderMeds(data.medications);
                     renderTasks(data.tasks);
-                    // updatePatientProfile(data.patient); // if we had this endpoint
+                    fetchReports(); // Fetch reports using the robust /api/reports endpoint
                 })
                 .catch(err => console.error("Error loading patient data:", err));
         }
@@ -1172,7 +1072,7 @@
                     <div>
                         <span style="font-size:0.75rem; font-weight:700; color:#6C757D;">${v.type.toUpperCase()}</span>
                         <div style="font-size:2rem; font-weight:800;">${v.value} <small style="font-size:0.9rem; color:#6C757D;">${v.unit}</small></div>
-                        <span style="color:#10B981; font-size:0.75rem; font-weight:700;">● Latest</span>
+                        <span style="color:#10B981; font-size:0.75rem; font-weight:700;">? Latest</span>
                     </div>
                     <i class="fa-solid fa-heart-pulse" style="color:var(--primary); font-size:1.5rem;"></i>
                 </div>
@@ -1201,7 +1101,7 @@
             }
 
             container.innerHTML = tasks.map(t => `
-                <div class="routine-row ${t.is_completed ? 'completed' : 'pending'}">
+                <div class="routine-row ${t.is_completed ? 'completed' : 'pending'}" id="task-${t._id}" style="cursor: pointer" onclick="toggleTask('${t._id}', this)">
                     <div><i class="fa-${t.is_completed ? 'solid fa-circle-check' : 'regular fa-circle'}"></i> <strong>${t.title}</strong></div>
                     <span>${t.description}</span>
                     <span style="background:${t.is_completed ? '#DCFCE7' : '#E2E8F0'}; color:${t.is_completed ? '#15803D' : '#475569'}; padding:4px 10px; border-radius:6px; font-size:0.7rem; font-weight:800;">
@@ -1209,6 +1109,124 @@
                     </span>
                 </div>
             `).join('');
+        }
+
+        function toggleTask(taskId, element) {
+            const isCompleted = element.classList.contains('completed');
+            const newStatus = !isCompleted;
+
+            fetch('/api/task/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task_id: taskId, is_completed: newStatus })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Force refresh patient data to reflect exact state in UI
+                        if (window.currentPatientId) {
+                            loadPatientData(window.currentPatientId);
+                        }
+                    } else {
+                        alert('Could not update task: ' + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error toggling task:', err);
+                    alert('Connection error while updating task.');
+                });
+        }
+
+        // --- REPORTS LOGIC ---
+        function handleReportUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!window.currentPatientId) {
+                alert("Please select a user first.");
+                return;
+            }
+
+            if (file.type !== 'application/pdf') {
+                alert('Please upload a PDF file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('patient_id', window.currentPatientId); // Required for guardian upload
+
+            document.getElementById('uploadProgressContainer').style.display = 'block';
+            document.getElementById('uploadProgressBar').style.width = '30%';
+
+            fetch('/api/reports/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => {
+                    document.getElementById('uploadProgressBar').style.width = '70%';
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('uploadProgressBar').style.width = '100%';
+                    setTimeout(() => {
+                        document.getElementById('uploadProgressContainer').style.display = 'none';
+                        document.getElementById('uploadProgressBar').style.width = '0%';
+                        if (data.status === 'success') {
+                            fetchReports();
+                        } else {
+                            alert('Upload failed: ' + (data.error || 'Unknown error'));
+                        }
+                    }, 500);
+                })
+                .catch(err => {
+                    console.error('Upload error:', err);
+                    document.getElementById('uploadProgressContainer').style.display = 'none';
+                    alert('An error occurred during upload.');
+                })
+                .finally(() => {
+                    event.target.value = '';
+                });
+        }
+
+        function fetchReports() {
+            if (!window.currentPatientId) return;
+
+            fetch('/api/reports?patient_id=' + window.currentPatientId)
+                .then(res => res.json())
+                .then(data => {
+                    const grid = document.getElementById('reportsGrid');
+                    if (!data.reports || data.reports.length === 0) {
+                        grid.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #64748B; background: white; border-radius: 16px; grid-column: 1 / -1; border: 2px dashed #E2E8F0;">
+                            <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: #CBD5E1; margin-bottom: 15px;"></i>
+                            <h3 style="margin: 0; color: #475569;">No Medical Reports</h3>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Upload the first PDF report for this user.</p>
+                        </div>
+                    `;
+                        return;
+                    }
+
+                    grid.innerHTML = data.reports.map(r => `
+                    <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #E2E8F0; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)'">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                <div style="width: 50px; height: 50px; background: #FEF2F2; color: #EF4444; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: #1E293B; word-break: break-all;">${r.filename}</h4>
+                                    <small style="color: #64748B;">Uploaded: ${new Date(r.upload_date).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="${r.filepath}" target="_blank" style="text-decoration: none; display: block; text-align: center; background: #F1F5F9; color: var(--primary); padding: 10px; border-radius: 10px; font-weight: 700; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">
+                            <i class="fa-solid fa-eye"></i> View PDF
+                        </a>
+                    </div>
+                `).join('');
+                })
+                .catch(err => console.error('Error fetching reports:', err));
         }
 
         // --- BOOKING LOGIC ---
@@ -1231,7 +1249,7 @@
                 return;
             }
 
-            const patientId = document.getElementById('patientSelect').value;
+            const patientId = window.currentPatientId;
             // formatted date for demo
             const dateStr = currentViewDate.toISOString().split('T')[0];
 
@@ -1380,7 +1398,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.emergency_detected) {
-                        alert("🚨 EMERGENCY DETECTED! Check your notifications immediately.");
+                        if (confirm("?? EMERGENCY DETECTED for " + data.patient_name + "! Check your notifications. Click OK to acknowledge and clear this alert.")) {
+                            fetch('/api/clear-emergency/' + data.patient_id, { method: 'POST' })
+                                .then(res => res.json())
+                                .then(clearData => {
+                                    if (clearData.status === 'success') {
+                                        console.log('Emergency cleared successfully.');
+                                    }
+                                });
+                        }
                     }
                 })
                 .catch(e => { }); // silent fail
@@ -1416,7 +1442,7 @@
         /*===================================== medical report ================================*/
         function printMedicalReport() {
             // (Keeping the original print function as it was)
-            const patientName = "John Willoughby";
+            const patientName = "Grandpa";
             const patientID = "#GS-88210";
             const dob = "May 12, 1952";
             const bloodType = "O+ Positive";
@@ -1445,14 +1471,14 @@
             <body>
                 <div class="header">
                     <div class="logo">GOLDENSAGE CARE</div>
-                    <div class="report-title">Official Patient Medical Profile</div>
+                    <div class="report-title">Official User Medical Profile</div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">PATIENT INFORMATION</div>
+                    <div class="section-title">USER INFORMATION</div>
                     <div class="grid">
                         <div><span class="label">Name:</span> ${patientName}</div>
-                        <div><span class="label">Patient ID:</span> ${patientID}</div>
+                        <div><span class="label">User ID:</span> ${patientID}</div>
                         <div><span class="label">Date of Birth:</span> ${dob}</div>
                         <div><span class="label">Blood Type:</span> ${bloodType}</div>
                     </div>
@@ -1470,11 +1496,11 @@
 
                 <div class="section">
                     <div class="section-title">EMERGENCY CONTACT</div>
-                    <p>Sarah Willoughby (Guardian) <br> Phone: +1 (555) 0123-456</p>
+                    <p>Sarah Willoughby (Caretaker) <br> Phone: +1 (555) 0123-456</p>
                 </div>
 
                 <div class="footer">
-                    Generated via GoldenSage Guardian Executive Dashboard on ${new Date().toLocaleString()}<br>
+                    Generated via GoldenSage Caretaker Executive Dashboard on ${new Date().toLocaleString()}<br>
                     This document is intended for medical professionals only.
                 </div>
             </body>
@@ -1487,6 +1513,93 @@
                 printWindow.print();
                 printWindow.close();
             }, 500);
+        }
+
+        // --- MEDICAL REPORTS LOGIC ---
+        function fetchReports(patientId) {
+            const id = patientId || window.currentPatientId;
+            if (!id) return;
+            fetch('/api/reports?patient_id=' + id)
+                .then(res => res.json())
+                .then(data => {
+                    const grid = document.getElementById('reportsGrid');
+                    if (data.reports && data.reports.length > 0) {
+                        grid.innerHTML = data.reports.map(r => `
+                        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; background: white; border-radius: 16px; border: 1px solid #E2E8F0; padding: 25px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                            <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+                                <div style="background: #FEF2F2; color: #EF4444; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0 0 5px 0; font-size: 1rem; color: #1E293B; word-break: break-all;">${r.filename}</h4>
+                                    <p style="margin: 0; font-size: 0.8rem; color: #64748B;">
+                                        Uploaded: ${new Date(r.upload_date).toLocaleDateString()}<br>
+                                        Size: ${(r.file_size / 1024).toFixed(1)} KB
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="window.open('${r.filepath}', '_blank')" style="background: #F1F5F9; color: var(--primary); border: none; padding: 10px; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Document
+                            </button>
+                        </div>
+                    `).join('');
+                    } else {
+                        grid.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #64748B; background: white; border-radius: 16px; grid-column: 1 / -1; border: 2px dashed #E2E8F0;">
+                            <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: #CBD5E1; margin-bottom: 15px;"></i>
+                            <h3 style="margin: 0; color: #475569;">No Medical Reports</h3>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Upload the first PDF report for this user.</p>
+                        </div>
+                    `;
+                    }
+                })
+                .catch(err => console.error('Error fetching reports:', err));
+        }
+
+        function handleReportUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const patientId = window.currentPatientId;
+            if (!patientId) {
+                alert("No user linked. Please contact support.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('patient_id', patientId);
+
+            const progressContainer = document.getElementById('uploadProgressContainer');
+            const progressBar = document.getElementById('uploadProgressBar');
+
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '10%';
+
+            fetch('/api/reports/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        progressBar.style.width = '0%';
+                        if (data.status === 'success') {
+                            fetchReports(patientId);
+                        } else {
+                            alert("Upload failed: " + data.error);
+                        }
+                    }, 1000);
+                })
+                .catch(err => {
+                    console.error("Upload error:", err);
+                    progressContainer.style.display = 'none';
+                    alert("An error occurred during upload.");
+                });
+
+            // clear input
+            event.target.value = '';
         }
     </script>
 </body>

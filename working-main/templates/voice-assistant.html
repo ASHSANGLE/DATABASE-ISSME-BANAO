@@ -32,6 +32,10 @@
       padding: 0
     }
 
+    html {
+      font-size: 18px;
+    }
+
     html,
     body {
       min-height: 100vh;
@@ -942,14 +946,9 @@
       <div>
         <div class="section-label">⚡ Quick Commands</div>
         <div class="quick-grid">
-          <button class="quick-chip" onclick="quickSend('Go to home dashboard')">🏠 My Day</button>
           <button class="quick-chip" onclick="quickSend('Show my medicines')">💊 Medicines</button>
           <button class="quick-chip" onclick="quickSend('Open my profile')">👤 Profile</button>
-          <button class="quick-chip" onclick="quickSend('Show my notifications')">🔔 Alerts</button>
-          <button class="quick-chip" onclick="quickSend('Open connections community')">🤝 Connect</button>
           <button class="quick-chip" onclick="quickSend('What are my vitals today?')">❤️ Vitals</button>
-          <button class="quick-chip" onclick="quickSend('Mark my morning task complete')">✅ Tasks</button>
-          <button class="quick-chip" onclick="quickSend('Request medicine refill')">🔄 Refill</button>
           <button class="quick-chip" onclick="quickSend('Log me out')">🚪 Logout</button>
           <button class="quick-chip danger sos-pulse" onclick="quickSend('SOS emergency help me now')">🚨 SOS</button>
         </div>
@@ -1036,9 +1035,9 @@
       'NAVIGATE_PROFILE': { icon: '👤', label: 'Open My Profile', cls: '' },
       'NAVIGATE_CONNECTIONS': { icon: '🤝', label: 'Go to Connections', cls: '' },
       'NAVIGATE_NOTIFICATIONS': { icon: '🔔', label: 'Open Notifications', cls: '' },
-      'NAVIGATE_GUARDIAN_HOME': { icon: '🛡️', label: 'Guardian Dashboard', cls: '' },
+      'NAVIGATE_GUARDIAN_HOME': { icon: '🛡️', label: 'Caretaker Dashboard', cls: '' },
       'NAVIGATE_DAILY_UPDATES': { icon: '📊', label: 'Daily Updates', cls: '' },
-      'NAVIGATE_PATIENT_PROFILE': { icon: '👤', label: 'Patient Profile', cls: '' },
+      'NAVIGATE_PATIENT_PROFILE': { icon: '👤', label: 'User Profile', cls: '' },
       'NAVIGATE_PREFERENCES': { icon: '⚙️', label: 'Preferences', cls: '' },
       'TRIGGER_SOS': { icon: '🚨', label: 'Send SOS Emergency NOW', cls: 'danger' },
       'TRIGGER_REFILL': { icon: '🔄', label: 'Request Medicine Refill', cls: '' },
@@ -1180,11 +1179,23 @@
       if (sn) sn.textContent = state.navs; if (sa) sa.textContent = state.acts;
 
       if (data.action === 'TRIGGER_SOS') {
-        fetch('/feature/sos/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-          .then(r => r.json()).then(d => {
-            const msg = d.status === 'success' ? '🚨 SOS sent! Your guardian has been notified immediately. Stay calm — help is on the way.' : '⚠️ SOS could not be sent. Please call 112 immediately.';
-            appendBotMsg(msg, null); if (state.autoSpeak) speakText(msg);
+        fetch('/feature/sos/trigger', { 
+          method: 'POST', 
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' } 
+        })
+          .then(r => r.json())
+          .then(d => {
+            const msg = d.status === 'success' ? '🚨 SOS sent! Your caretaker has been notified immediately. Stay calm — help is on the way.' : '⚠️ SOS could not be sent. Please call 112 immediately.';
+            appendBotMsg(msg, null); 
+            if (state.autoSpeak) speakText(msg);
             updateLastAction({ action: 'TRIGGER_SOS' });
+          })
+          .catch(err => {
+            console.error('SOS fetch error:', err);
+            const msg = '⚠️ Failed to send SOS. Please call 112 immediately.';
+            appendBotMsg(msg, null);
+            if (state.autoSpeak) speakText(msg);
           });
         return;
       }

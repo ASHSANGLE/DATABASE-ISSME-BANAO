@@ -497,7 +497,7 @@
             background-attachment: fixed;
             position: relative;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 50px;
             color: #fff;
             min-height: 100vh;
@@ -588,213 +588,214 @@
                 transform: rotate(45px);
                 /* Turns + into x or just indicates change */
             }
+        }
 
-            /* Modal Overlay Styling */
-            .modal-overlay {
-                display: none;
-                /* Hidden by default */
-                position: fixed;
-                z-index: 1000;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.6);
-                /* Dim the background when popup is open */
-                backdrop-filter: blur(5px);
-                justify-content: center;
-                align-items: center;
-            }
+        /* Modal Overlay Styling */
+        .modal-overlay {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            /* Dim the background when popup is open */
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
 
-            .modal-content {
-                background-color: #fff;
-                padding: 40px;
-                border-radius: 24px;
-                max-width: 550px;
-                width: 90%;
-                position: relative;
-                text-align: center;
-                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-                animation: modalPop 0.3s ease-out;
-            }
+        .modal-content {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 550px;
+            width: 90%;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            animation: modalPop 0.3s ease-out;
+        }
 
-            @keyframes modalPop {
-                from {
-                    transform: scale(0.8);
-                    opacity: 0;
-                }
-
-                to {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-            }
-
-            .close-modal {
-                position: absolute;
-                right: 20px;
-                top: 15px;
-                font-size: 30px;
-                cursor: pointer;
-                color: #666;
-            }
-
-            #modalTitle {
-                color: #181D5E;
-                margin-top: 15px;
-                font-size: 24px;
-            }
-
-            #modalBody {
-                margin-top: 15px;
-                color: #444;
-                line-height: 1.6;
-                font-size: 16px;
-            }
-
-            #modalLogoContainer img {
-                width: 80px;
-                height: auto;
-            }
-
-            /* Change cursor to indicate cards are clickable */
-            .feature-card {
-                cursor: pointer;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .feature-card:hover {
-                transform: translateY(-5px) !important;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            }
-
-            /* Styling for the icon inside the dropdown */
-            .dashboard-dropdown a i {
-                width: 18px;
-                color: #666;
-                transition: 0.3s;
-            }
-
-            .dashboard-dropdown a:hover i {
-                color: var(--hover-red);
-                transform: rotate(45deg);
-            }
-
-            /*=============================================  Sttings  ==================================*/
-
-            /* Dark Mode Color Definitions */
-            body.dark-theme {
-                --primary-navy: #0a0c2e;
-                --accent-blue: #167ba3;
-                --soft-blue: #121212;
-                --text-dark: #e0e0e0;
-                --white: #1e1e1e;
-            }
-
-            /* Specific overrides for Dark Mode */
-            body.dark-theme .features-section,
-            body.dark-theme .process-section {
-                background-color: #121212 !important;
-            }
-
-            body.dark-theme .feature-card,
-            body.dark-theme .modal-content {
-                background: #252525;
-                color: #ffffff;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            }
-
-            body.dark-theme .feature-right p,
-            body.dark-theme #pDesc {
-                color: #bbb;
-            }
-
-            body.dark-theme #pTitle,
-            body.dark-theme .feature-right h3 {
-                color: #38bdf8;
-            }
-
-            /* Toggle Switch Styling */
-            .theme-switch-wrapper {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 20px;
-                background: #f0f9ff;
-                border-radius: 15px;
-                margin-top: 20px;
-            }
-
-            body.dark-theme .theme-switch-wrapper {
-                background: #333;
-            }
-
-            .switch {
-                position: relative;
-                display: inline-block;
-                width: 50px;
-                height: 24px;
-            }
-
-            .switch input {
+        @keyframes modalPop {
+            from {
+                transform: scale(0.8);
                 opacity: 0;
-                width: 0;
-                height: 0;
             }
 
-            .slider {
-                position: absolute;
-                cursor: pointer;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: #ccc;
-                transition: .4s;
-                border-radius: 34px;
+            to {
+                transform: scale(1);
+                opacity: 1;
             }
+        }
 
-            .slider:before {
-                position: absolute;
-                content: "";
-                height: 16px;
-                width: 16px;
-                left: 4px;
-                bottom: 4px;
-                background-color: white;
-                transition: .4s;
-                border-radius: 50%;
-            }
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #666;
+        }
 
-            input:checked+.slider {
-                background-color: #38bdf8;
-            }
+        #modalTitle {
+            color: #181D5E;
+            margin-top: 15px;
+            font-size: 24px;
+        }
 
-            input:checked+.slider:before {
-                transform: translateX(26px);
-            }
+        #modalBody {
+            margin-top: 15px;
+            color: #444;
+            line-height: 1.6;
+            font-size: 16px;
+        }
 
-            /* Optional: Style for a "Settings" specific layout if you use a modal */
-            .settings-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-                text-align: left;
-                margin-top: 20px;
-            }
+        #modalLogoContainer img {
+            width: 80px;
+            height: auto;
+        }
 
-            .setting-item {
-                padding: 15px;
-                border: 1px solid #eee;
-                border-radius: 12px;
-                cursor: pointer;
-                transition: 0.2s;
-            }
+        /* Change cursor to indicate cards are clickable */
+        .feature-card {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
-            .setting-item:hover {
-                background: #f0f9ff;
-                border-color: var(--accent-blue);
-            }
+        .feature-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling for the icon inside the dropdown */
+        .dashboard-dropdown a i {
+            width: 18px;
+            color: #666;
+            transition: 0.3s;
+        }
+
+        .dashboard-dropdown a:hover i {
+            color: var(--hover-red);
+            transform: rotate(45deg);
+        }
+
+        /*=============================================  Sttings  ==================================*/
+
+        /* Dark Mode Color Definitions */
+        body.dark-theme {
+            --primary-navy: #0a0c2e;
+            --accent-blue: #167ba3;
+            --soft-blue: #121212;
+            --text-dark: #e0e0e0;
+            --white: #1e1e1e;
+        }
+
+        /* Specific overrides for Dark Mode */
+        body.dark-theme .features-section,
+        body.dark-theme .process-section {
+            background-color: #121212 !important;
+        }
+
+        body.dark-theme .feature-card,
+        body.dark-theme .modal-content {
+            background: #252525;
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        body.dark-theme .feature-right p,
+        body.dark-theme #pDesc {
+            color: #bbb;
+        }
+
+        body.dark-theme #pTitle,
+        body.dark-theme .feature-right h3 {
+            color: #38bdf8;
+        }
+
+        /* Toggle Switch Styling */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        body.dark-theme .theme-switch-wrapper {
+            background: #333;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #38bdf8;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Optional: Style for a "Settings" specific layout if you use a modal */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .setting-item {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .setting-item:hover {
+            background: #f0f9ff;
+            border-color: var(--accent-blue);
+        }
     </style>
 </head>
 
@@ -816,9 +817,9 @@
             </div>
         </div>
         <div class="nav-bottom">
-            <div><a href="#about">About Us</a> <a href="#faq">FAQ</a></div>
+            <div><a href="#about">About Us</a></div>
             <div class="mini-right">
-                <span><i class="fas fa-phone"></i> +91-1234567890</span>
+                <span><i class="fas fa-phone"></i> +91-9892972344</span>
                 <a href="#" style="color:#000;"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
@@ -956,31 +957,8 @@
                 of the way.</p>
         </div>
 
-        <div class="faq-column">
-            <h2 class="faq-heading">FAQs</h2>
+        </div>
 
-            <div class="faq-container">
-                <div class="faq-item">
-                    <div class="faq-question">
-                        How do I create a patient profile?
-                        <span class="toggle-icon">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Navigate to your dashboard and select 'Add Patient' to input medical history securely.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        Can I share these session overviews with my family doctor?
-                        <span class="toggle-icon">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        Yes, you can download or print any session overview to share with external medical professionals
-                        during your visits.
-                    </div>
-                </div>
-            </div>
 
     </section>
 
@@ -1049,7 +1027,7 @@
         // PROCESS STEPS DATA
         const steps = [
             { t: "Register", d: "Create your secure caregiver account in seconds." },
-            { t: "Add Profile", d: "Input patient medical history and therapy needs." },
+            { t: "Add Profile", d: "Input user medical history and therapy needs." },
             { t: "Schedule Care", d: "Automate daily tasks and reminders." },
             { t: "Monitor", d: "Track health vitals and charts in real-time." }
         ];
@@ -1090,8 +1068,7 @@
 
         // Start loop when page loads
         document.addEventListener("DOMContentLoaded", startAutoLoop);
-        // FAQ TOGGLE
-        function toggleFAQ(el) { el.classList.toggle('open'); }
+        // FAQ TOGGLE REMOVED
 
         // SCROLL REVEAL ANIMATION
         const observerOptions = {
@@ -1195,16 +1172,7 @@
             };
         });
 
-        // FAQ LOGIC (Kept separate as it doesn't use the modal)
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const item = question.parentElement;
-                item.classList.toggle('active');
-                document.querySelectorAll('.faq-item').forEach(otherItem => {
-                    if (otherItem !== item) otherItem.classList.remove('active');
-                });
-            });
-        });
+
     </script>
 </body>
 

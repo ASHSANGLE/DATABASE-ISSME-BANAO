@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Login - Ayur Tech</title>
+    <title>User Login - Golden Sage</title>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap"
@@ -217,23 +217,6 @@
             color: var(--primary-medium);
         }
 
-        .social-login {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .social-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background: #fff;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-
         @media (max-width: 768px) {
             .content {
                 flex-direction: column;
@@ -250,7 +233,7 @@
 
     <div class="navbar">
         <img src="/assets/nl.jpg" alt="Logo">
-        <span>Ayur Tech</span>
+        <span>Golden Sage</span>
         <a href="/main">Home</a>
     </div>
 
@@ -263,10 +246,9 @@
         <div class="content">
             <div class="sidebar">
                 <div class="card" style="text-align: center;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2750/2750657.png" width="80"
-                        style="margin-bottom: 15px;">
+                    <i class="fas fa-leaf" style="font-size: 52px; color: var(--primary-medium); margin-bottom: 15px; display: block;"></i>
                     <h3>Welcome Back</h3>
-                    <p style="font-size: 13px; color: #666;">Access your personalized Ayurvedic wellness dashboard.</p>
+                    <p style="font-size: 13px; color: #666;">Access your personalized Golden Sage wellness dashboard.</p>
                 </div>
                 <div class="card">
                     <h4 style="margin-bottom: 15px; color: var(--primary-navy);">Security Tips</h4>
@@ -280,7 +262,7 @@
 
             <div class="main">
                 <div class="card">
-                    <h3><i class="fas fa-user-injured"></i> Patient Login</h3>
+                    <h3><i class="fas fa-user-injured"></i> User Login</h3>
                     {% with messages = get_flashed_messages() %}
                     {% if messages %}
                     <div style="color: red; margin-bottom: 10px; text-align: center;">
@@ -291,7 +273,7 @@
 
                     <form action="/login/patient" method="POST">
                         <div class="form-group">
-                            <label>Patient Email</label>
+                            <label>User Email</label>
                             <input type="email" name="email" placeholder="Enter your registered email" required>
                         </div>
                         <div class="form-group">
@@ -315,18 +297,8 @@
                         </button>
                     </form>
 
-                    <div style="text-align: center; margin: 20px 0; color: #aaa; font-size: 12px; position: relative;">
-                        <hr style="border: 0; border-top: 1px solid #eee;">
-                        <span
-                            style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 10px;">OR</span>
-                    </div>
-
-                    <div class="social-login">
-                        <button class="social-btn"><i class="fab fa-google"></i> Google</button>
-                        <button class="social-btn"><i class="fab fa-facebook-f"></i> Facebook</button>
-                    </div>
                     <div class="register-link">
-                        <p>New patient? <a href="/signup">Register for GoldenSage</a></p>
+                        <p>New user? <a href="/signup">Register for GoldenSage</a></p>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Golden Sage - Sudoku</title>
+    <link rel="stylesheet" href="/static/suduko.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header" style="position: relative;">
+        <button onclick="window.close()"
+            style="position: absolute; left: 20px; top: 15px; background: transparent; border: none; color: white; cursor: pointer; font-size: 1.5rem;">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h1>Golden Sage Sudoku</h1>
+    </header>
+
+    <main class="main-content">
+
+        <div class="app">
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Grid Size</label>
+                    <select onchange="changeGrid(this.value)">
+                        <option value="4" {% if size==4 %}selected{% endif %}>4 x 4</option>
+                        <option value="9" {% if size==9 %}selected{% endif %}>9 x 9</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="board" style="grid-template-columns: repeat({{ size }}, 1fr);">
+                {% for i in range(size) %}
+                {% for j in range(size) %}
+                <div class="cell" onclick="fillCell({{i}}, {{j}})">
+                    {{ grid[i][j] if grid[i][j] != 0 else "" }}
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+
+            <p id="message" class="message"></p>
+
+        </div>
+
+    </main>
+
+    <footer class="main-footer">
+        © 2026 Golden Sage
+    </footer>
+
+    <script>
+        function fillCell(row, col) {
+            let num = prompt("Enter number");
+            if (!num) return;
+
+            fetch("/sudoku/check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    row: row,
+                    col: col,
+                    num: parseInt(num)
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    const message = document.getElementById("message");
+
+                    if (data.status === "correct") {
+                        message.innerText = "";
+                        location.reload();
+                    }
+                    else if (data.status === "blocked") {
+                        message.innerHTML = "<strong>INVALID MOVE</strong>";
+                    }
+                    else {
+                        message.innerHTML = "<strong>INVALID MOVE</strong>";
+                    }
+                });
+        }
+
+        function changeGrid(size) {
+            window.location.href = "/sudoku?size=" + size;
+        }
+    </script>
+
+</body>
+
+</html>

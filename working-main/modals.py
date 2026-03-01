@@ -18,9 +18,16 @@ class User(UserMixin):
 
     @staticmethod
     def get_user_by_id(mongo, user_id):
-        # Split prefix: "guardian:123abc..." -> ["guardian", "123abc..."]
+        if not user_id or not isinstance(user_id, str):
+            return None
+        # Required format: "role:db_id" (e.g. "guardian:123abc..." or "patient:123abc...")
+        # This ensures the session always resolves to the correct role
+        if ':' not in user_id:
+            return None  # Invalid format, force re-login
         try:
             role, db_id = user_id.split(':', 1)
+            if not db_id:
+                return None
             if role == 'guardian':
                 collection = mongo.db.guardians
             elif role == 'patient':
@@ -29,11 +36,10 @@ class User(UserMixin):
                 collection = mongo.db.unity_users
             else:
                 return None
-                
             data = collection.find_one({'_id': ObjectId(db_id)})
             if data:
                 return User(data, role)
-        except:
+        except Exception:
             return None
         return None
 

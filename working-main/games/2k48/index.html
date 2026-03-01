@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2k48</title>
+    <link rel="stylesheet" href="game.css">
+</head>
+<body>
+
+<header>
+    <h1>2k48 Game</h1>
+</header>
+
+<div class="instructions">
+    <p><strong>Use Arrow Keys ⬅ ⬆ ⬇ ➡ to Move Tiles</strong></p>
+</div>
+<div class="how-to-play">
+    <h2>How The Game Works</h2>
+    <ul>
+        <li>Use Arrow Keys ⬅ ⬆ ⬇ ➡ to move tiles.</li>
+        <li>When two tiles with the same number touch, they merge into one.</li>
+        <li>Each merge increases your score.</li>
+        <li>A new tile (2 or 4) appears after every move.</li>
+        <li>Reach 2048 to win the level 🎉</li>
+        <li>The game ends when no moves are possible.</li>
+    </ul>
+</div>
+
+<div class="score-container">
+    <div id="score">Score: 0</div>
+    <div id="highScore">High Score: 0</div>
+    <button onclick="restartGame()">Restart</button>
+    <button onclick="toggleDarkMode()">Dark Mode</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div id="levelPopup" class="level-popup"></div>
+
+<footer>
+    Developed by <span class="golden">Golden Sage</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="game.js"></script>
+
+</body>
+</html>
